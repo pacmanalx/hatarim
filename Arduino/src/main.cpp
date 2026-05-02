@@ -120,6 +120,8 @@ float    prevNetDown = -1;
 char     prevHostBuf[INFO_LEN] = {0};
 char     prevInfoBuf[INFO_LEN] = {0};
 bool     firstFrame = true;
+const unsigned long SPLASH_HOLD_MS = 5000;
+unsigned long splashHoldUntil = 0;
 
 // Forward declarations — yieldSerial chama processLine, que é definido
 // depois do renderDirty (que precisa chamar yieldSerial entre primitivas).
@@ -174,44 +176,71 @@ void drawCpuIconLarge(int cx, int cy, uint16_t color) {
     }
 }
 
+void drawIsraelFlag(int x, int y, int w, int h) {
+    tft.fillRect(x, y, w, h, C_WHITE);
+    int stripeH = h * 14 / 100;
+    int stripeMargin = h * 12 / 100;
+    tft.fillRect(x, y + stripeMargin, w, stripeH, C_BLUE);
+    tft.fillRect(x, y + h - stripeMargin - stripeH, w, stripeH, C_BLUE);
+    int cx = x + w / 2;
+    int cy = y + h / 2;
+    int r = h / 4;
+    int dx = (r * 866) / 1000;
+    int dy = r / 2;
+    tft.drawTriangle(cx, cy - r, cx - dx, cy + dy, cx + dx, cy + dy, C_BLUE);
+    tft.drawTriangle(cx, cy + r, cx - dx, cy - dy, cx + dx, cy - dy, C_BLUE);
+}
+
 void drawSplash() {
     tft.fillScreen(C_BG);
-    drawCpuIconLarge(TFT_W / 2, 110, C_CYAN);
+    drawCpuIconLarge(TFT_W / 2, 60, C_CYAN);
+
     const char *name = "HaTarim";
-    int nameLen = (int)strlen(name);
-    int nameW = nameLen * 18;
-    int nameX = (TFT_W - nameW) / 2;
+    int nameW = (int)strlen(name) * 18;
     tft.setTextSize(3);
     tft.setTextColor(C_WHITE, C_BG);
-    tft.setCursor(nameX, 175);
+    tft.setCursor((TFT_W - nameW) / 2, 110);
     tft.print(name);
-    tft.setTextSize(2);
+
+    drawIsraelFlag(85, 155, 70, 35);
+
+    const char *pray = "Pray for Israel!";
+    int prayW = (int)strlen(pray) * 6;
+    tft.setTextSize(1);
     tft.setTextColor(C_CYAN, C_BG);
-    int v2W = 2 * 12;
-    tft.setCursor(nameX + nameW - v2W, 205);
-    tft.print("v2");
+    tft.setCursor((TFT_W - prayW) / 2, 205);
+    tft.print(pray);
+
     const char *waiting = "aguardando dados...";
     int waitW = (int)strlen(waiting) * 6;
     tft.setTextSize(1);
     tft.setTextColor(C_DIMGRAY, C_BG);
-    tft.setCursor((TFT_W - waitW) / 2, 245);
+    tft.setCursor((TFT_W - waitW) / 2, 250);
     tft.print(waiting);
 }
 
-// ─────────────── FAN status badge ───────────────
+// ─────────────── FAN status badge (ícone fan colorido) ───────────────
+// ON → verde · OFF → vermelho · C_BLUE reservado pra estado indeterminado futuro
 void drawFanBadge() {
-    const int x = 186, y = 2, w = 52, h = 14;
-    uint16_t bg, fg;
-    const char *txt;
-    if (fanState) { bg = C_GREEN;   fg = C_BG;    txt = "FAN ON";  }
-    else          { bg = C_DIMGRAY; fg = C_BG;    txt = "FAN OFF"; }
-    tft.fillRoundRect(x, y, w, h, 3, bg);
-    tft.drawRoundRect(x, y, w, h, 3, C_WHITE);
-    tft.setTextSize(1);
-    tft.setTextColor(fg, bg);
-    int textW = (int)strlen(txt) * 6;
-    tft.setCursor(x + (w - textW) / 2, y + 4);
-    tft.print(txt);
+    const int x = 216, y = 4, w = 16, h = 16;
+    const int cx = x + w / 2;
+    const int cy = y + h / 2;
+
+    tft.fillRect(186, 2, 54, 18, C_BG);
+
+    uint16_t color = fanState ? C_GREEN : C_RED;
+
+    static const int tips[3][2]      = {{0, -6}, {-5,  3}, { 5,  3}};
+    static const int leftBase[3][2]  = {{-2,  0}, { 1,  2}, { 1, -2}};
+    static const int rightBase[3][2] = {{ 2,  0}, {-1, -2}, {-1,  2}};
+    for (uint8_t i = 0; i < 3; i++) {
+        tft.fillTriangle(
+            cx + tips[i][0],      cy + tips[i][1],
+            cx + leftBase[i][0],  cy + leftBase[i][1],
+            cx + rightBase[i][0], cy + rightBase[i][1],
+            color);
+    }
+    tft.fillCircle(cx, cy, 2, color);
 }
 
 // ─────────────── Header (linha 1: HOST, linha 2: INFO) ───────────────
@@ -444,6 +473,7 @@ void redrawAll() {
 
 // ─────────────── Render dirty-diff ───────────────
 void renderDirty() {
+    if (millis() < splashHoldUntil) return;
     bool layoutChanged = (numCores != prevNumCores) || (numEcores != prevNumEcores);
     if (firstFrame) {
         // empilha primeira amostra de histórico
@@ -720,6 +750,7 @@ void setup() {
     tft.setRotation(0);
     drawSplash();
     drawFanBadge();
+    splashHoldUntil = millis() + SPLASH_HOLD_MS;
 
     for (uint8_t i = 0; i < MAX_CORES; i++) prevCpuCores[i] = 255;
 }
