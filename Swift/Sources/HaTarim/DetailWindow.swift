@@ -105,14 +105,10 @@ struct DetailWindow: View {
                     }
                 }
 
-                // Tier 4 — LLM Stack
-                section(L.t("LLM Stack", "Stack LLM"), icon: "checkmark.shield.fill", color: schedulerColor,
-                        subtitle: schedulerSubtitle) {
-                    if servicesStore.config.services.isEmpty {
-                        LazyVGrid(columns: adaptiveCols, spacing: 10) {
-                            StackHealthEmptyCard().alignedTop()
-                        }
-                    } else {
+                // Tier 4 — LLM Stack (só aparece se houver pelo menos 1 serviço configurado)
+                if !servicesStore.config.services.isEmpty {
+                    section(L.t("LLM Stack", "Stack LLM"), icon: "checkmark.shield.fill", color: schedulerColor,
+                            subtitle: schedulerSubtitle) {
                         VStack(spacing: 10) {
                             HStack(alignment: .top, spacing: 10) {
                                 StackHealthTable(services: servicesStore.config.services,
