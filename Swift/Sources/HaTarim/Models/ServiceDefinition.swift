@@ -134,6 +134,12 @@ struct ServiceDefinition: Codable, Identifiable, Equatable {
     var expectedHTTPStatus: Int
     var sshExtraArgs: String
 
+    /// Template de chamada interativa (Call LLM card). Substitui `{{prompt}}` pelo input do usuário.
+    /// Para Ollama HTTP, deixa vazio — usa /api/generate direto.
+    /// Para SSH/local, ex: `bash -lc "claude --print '{{prompt}}'"` ou
+    /// `bash -lc "/path/kimi --print --prompt '{{prompt}}'"`.
+    var callTemplate: String
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -148,7 +154,8 @@ struct ServiceDefinition: Codable, Identifiable, Equatable {
         level3: LevelConfig = .l3Default,
         modelsToCheck: [String] = [],
         expectedHTTPStatus: Int = 200,
-        sshExtraArgs: String = ""
+        sshExtraArgs: String = "",
+        callTemplate: String = ""
     ) {
         self.id = id
         self.name = name
@@ -164,6 +171,7 @@ struct ServiceDefinition: Codable, Identifiable, Equatable {
         self.modelsToCheck = modelsToCheck
         self.expectedHTTPStatus = expectedHTTPStatus
         self.sshExtraArgs = sshExtraArgs
+        self.callTemplate = callTemplate
     }
 
     /// Decoder tolerante: aceita schema novo (level1/level2/level3) ou
@@ -181,6 +189,7 @@ struct ServiceDefinition: Codable, Identifiable, Equatable {
         modelsToCheck       = try c.decodeIfPresent([String].self, forKey: .modelsToCheck) ?? []
         expectedHTTPStatus  = try c.decodeIfPresent(Int.self, forKey: .expectedHTTPStatus) ?? 200
         sshExtraArgs        = try c.decodeIfPresent(String.self, forKey: .sshExtraArgs) ?? ""
+        callTemplate        = try c.decodeIfPresent(String.self, forKey: .callTemplate) ?? ""
 
         if let l1 = try c.decodeIfPresent(LevelConfig.self, forKey: .level1) {
             level1 = l1
@@ -200,7 +209,7 @@ struct ServiceDefinition: Codable, Identifiable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case id, name, kind, endpoint, timeoutSec, notifyOnStateChange, nodeHint, enabled
         case level1, level2, level3
-        case modelsToCheck, expectedHTTPStatus, sshExtraArgs
+        case modelsToCheck, expectedHTTPStatus, sshExtraArgs, callTemplate
         // legacy (only for decoding migration)
         case intervalSec, sshRemoteCommand, deepCheck
     }
@@ -221,6 +230,7 @@ struct ServiceDefinition: Codable, Identifiable, Equatable {
         try c.encode(modelsToCheck, forKey: .modelsToCheck)
         try c.encode(expectedHTTPStatus, forKey: .expectedHTTPStatus)
         try c.encode(sshExtraArgs, forKey: .sshExtraArgs)
+        try c.encode(callTemplate, forKey: .callTemplate)
     }
 
     func config(for level: CheckLevel) -> LevelConfig {

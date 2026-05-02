@@ -125,8 +125,13 @@ struct DetailWindow: View {
                             StackHealthEmptyCard().alignedTop()
                         }
                     } else {
-                        StackHealthTable(services: servicesStore.config.services,
-                                         scheduler: healthScheduler)
+                        HStack(alignment: .top, spacing: 10) {
+                            StackHealthTable(services: servicesStore.config.services,
+                                             scheduler: healthScheduler)
+                                .frame(maxWidth: .infinity)
+                            CallLLMCard(services: servicesStore.config.services)
+                                .frame(maxWidth: .infinity)
+                        }
                     }
                 }
 
