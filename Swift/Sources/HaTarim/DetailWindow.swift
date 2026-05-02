@@ -125,12 +125,8 @@ struct DetailWindow: View {
                             StackHealthEmptyCard().alignedTop()
                         }
                     } else {
-                        LazyVGrid(columns: adaptiveCols, spacing: 10) {
-                            ForEach(servicesStore.config.services) { svc in
-                                ServiceHealthCard(service: svc, scheduler: healthScheduler)
-                                    .alignedTop()
-                            }
-                        }
+                        StackHealthTable(services: servicesStore.config.services,
+                                         scheduler: healthScheduler)
                     }
                 }
 

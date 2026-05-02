@@ -13,9 +13,14 @@ final class HealthCheckScheduler: ObservableObject {
     @Published private(set) var aggregateStatuses: [UUID: HealthStatus] = [:]
     /// Estado por (serviço, nível).
     @Published private(set) var levelStatuses: [UUID: [CheckLevel: LevelStatus]] = [:]
+    /// Próxima execução agendada por (serviço, nível). Exposto pra UI mostrar countdown.
+    @Published private(set) var nextRunDates: [UUID: [CheckLevel: Date]] = [:]
 
     private var histories: [UUID: [CheckLevel: HealthHistory]] = [:]
-    private var nextRun: [UUID: [CheckLevel: Date]] = [:]
+    private var nextRun: [UUID: [CheckLevel: Date]] {
+        get { nextRunDates }
+        set { nextRunDates = newValue }
+    }
     private var consecutiveFailures: [UUID: [CheckLevel: Int]] = [:]
     private var inflight: Set<String> = []
 
