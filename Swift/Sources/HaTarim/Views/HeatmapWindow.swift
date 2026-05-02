@@ -132,23 +132,30 @@ struct HeatmapCard: View {
         }
     }
 
-    // 24 linhas × 7 colunas
+    // 24 linhas × 7 colunas — renderiza CGImage 7×24 e usa interpolação bilinear de
+    // Core Graphics pra dar look de spectrogram tipo matplotlib (sem grades visíveis).
     private var heatmapGrid: some View {
         GeometryReader { geo in
             let cellW = geo.size.width / 7
             let cellH = geo.size.height / 24
             let bucketsByKey = computeBuckets()
             let maxHits = max(bucketsByKey.values.map(\.count).max() ?? 1, 1)
+            let cgImage = buildSpectrogramImage(buckets: bucketsByKey, maxHits: maxHits)
 
             ZStack(alignment: .topLeading) {
+                if let cgImage = cgImage {
+                    Image(decorative: cgImage, scale: 1, orientation: .up)
+                        .interpolation(.high)
+                        .resizable()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                }
+                // Overlay invisível por bucket pra captar hover sem atrapalhar o gradient
                 ForEach(0..<7, id: \.self) { dayIdx in
                     ForEach(0..<24, id: \.self) { hour in
                         let key = BucketKey(dayIndex: dayIdx, hour: hour)
-                        let bucket = bucketsByKey[key]
-                        let color = bucket.map { spectralColor(uptime: $0.uptimePct, latency: $0.avgLatencyMs, hits: $0.count, maxHits: maxHits) } ?? Color.black.opacity(0.04)
-
                         Rectangle()
-                            .fill(color)
+                            .fill(Color.clear)
+                            .contentShape(Rectangle())
                             .frame(width: cellW, height: cellH)
                             .position(x: cellW * (CGFloat(dayIdx) + 0.5),
                                       y: cellH * (CGFloat(23 - hour) + 0.5))
@@ -157,14 +164,83 @@ struct HeatmapCard: View {
                             }
                     }
                 }
-                // Border
                 Rectangle()
                     .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
                     .frame(width: geo.size.width, height: geo.size.height)
             }
         }
         .frame(minHeight: 360)
-        .background(Color.black.opacity(0.6))
+        .background(Color.black)
+    }
+
+    /// Monta uma matriz 7×24 de valores em [0..1] (combinando uptime e densidade) e
+    /// gera CGImage RGBA. Quando exibido com .interpolation(.high), Core Graphics faz
+    /// interpolação bilinear, transformando blocos discretos num gradient suave.
+    private func buildSpectrogramImage(buckets: [BucketKey: BucketStats], maxHits: Int) -> CGImage? {
+        let W = 7
+        let H = 24
+        var pixels = [UInt8](repeating: 0, count: W * H * 4)
+        for dayIdx in 0..<W {
+            for hour in 0..<H {
+                let key = BucketKey(dayIndex: dayIdx, hour: hour)
+                let py = 23 - hour // Y invertido: hora 23 no topo
+                let idx = (py * W + dayIdx) * 4
+                let value: Double
+                if let b = buckets[key], b.count > 0 {
+                    let densityNorm = log(Double(b.count) + 1) / log(Double(maxHits) + 1)
+                    let uptimeNorm = b.uptimePct / 100.0
+                    // Combina: densidade dá brilho base, uptime modula intensidade.
+                    value = densityNorm * (0.35 + 0.65 * uptimeNorm)
+                } else {
+                    value = 0
+                }
+                let (r, g, b, a) = magmaRGB(t: value)
+                pixels[idx]     = r
+                pixels[idx + 1] = g
+                pixels[idx + 2] = b
+                pixels[idx + 3] = a
+            }
+        }
+        let data = Data(pixels)
+        guard let provider = CGDataProvider(data: data as CFData) else { return nil }
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+        return CGImage(
+            width: W, height: H,
+            bitsPerComponent: 8, bitsPerPixel: 32,
+            bytesPerRow: W * 4,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo,
+            provider: provider,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: .defaultIntent
+        )
+    }
+
+    /// Color ramp `magma` (matplotlib-like): preto → roxo → magenta → laranja → amarelo.
+    /// Stops aproximados perceptualmente uniformes. Bom contraste sobre fundo preto.
+    private func magmaRGB(t: Double) -> (UInt8, UInt8, UInt8, UInt8) {
+        let stops: [(t: Double, r: Double, g: Double, b: Double)] = [
+            (0.00, 0.001, 0.000, 0.014),  // preto quase puro
+            (0.15, 0.080, 0.045, 0.180),  // azul-violeta escuro
+            (0.30, 0.230, 0.060, 0.435),  // roxo profundo
+            (0.50, 0.553, 0.183, 0.439),  // magenta
+            (0.70, 0.870, 0.288, 0.408),  // vermelho-rosa
+            (0.85, 0.985, 0.555, 0.348),  // laranja
+            (1.00, 0.987, 0.991, 0.749)   // amarelo claro
+        ]
+        let clamped = max(0, min(1, t))
+        var i = 0
+        while i < stops.count - 2 && stops[i + 1].t < clamped { i += 1 }
+        let lo = stops[i]
+        let hi = stops[i + 1]
+        let span = hi.t - lo.t
+        let frac = span > 0 ? (clamped - lo.t) / span : 0
+        let r = lo.r + (hi.r - lo.r) * frac
+        let g = lo.g + (hi.g - lo.g) * frac
+        let b = lo.b + (hi.b - lo.b) * frac
+        return (UInt8(r * 255), UInt8(g * 255), UInt8(b * 255), 255)
     }
 
     // MARK: - Axes
@@ -202,24 +278,20 @@ struct HeatmapCard: View {
             Text("Legenda").font(.caption.bold()).foregroundStyle(.secondary).textCase(.uppercase)
             HStack(spacing: 0) {
                 ForEach(0..<40, id: \.self) { i in
-                    let pct = Double(i) / 39.0 * 100
-                    spectralColor(uptime: pct, latency: 200, hits: 5, maxHits: 5)
+                    let t = Double(i) / 39.0
+                    let (r, g, b, _) = magmaRGB(t: t)
+                    Color(red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
                         .frame(width: 6, height: 14)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 2))
             HStack {
-                Text("0% uptime (frio)").font(.caption2).foregroundStyle(.tertiary)
+                Text("inativo").font(.caption2).foregroundStyle(.tertiary)
                 Spacer()
-                Text("100% (quente)").font(.caption2).foregroundStyle(.tertiary)
+                Text("alta atividade + saudável").font(.caption2).foregroundStyle(.tertiary)
             }
             .frame(width: 240)
-            HStack(spacing: 12) {
-                Label("Azul = falhas / inativo", systemImage: "circle.fill").foregroundStyle(.blue)
-                Label("Vermelho = saudável + ativo", systemImage: "circle.fill").foregroundStyle(.red)
-            }
-            .font(.caption2)
-            Text("Brilho da célula = densidade de hits no intervalo (mais hits = mais quente)")
+            Text("Cor combina densidade de hits × uptime · interpolação bilinear entre buckets")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
