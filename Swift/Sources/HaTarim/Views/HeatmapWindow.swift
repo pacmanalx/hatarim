@@ -1,13 +1,13 @@
 import SwiftUI
 import AppKit
 
-/// Janela de espectrograma 2D mostrando disponibilidade dos health checks.
+/// Card consolidador do tier LLM HaTarim — espectrograma 2D de disponibilidade.
 /// Eixo X = últimos 7 dias, Eixo Y = hora do dia (0-24h),
 /// Cor (calor) = quantidade de hits codificada em HSL+brilho:
 ///   - Hue: uptime % (vermelho 0% → ciano 100%)
 ///   - Lightness: latência relativa (escuro = rápido, claro = lento)
 ///   - Brightness/saturation: densidade de hits no bucket
-struct HeatmapWindow: View {
+struct HeatmapCard: View {
     @ObservedObject var store: ServicesStore
     @ObservedObject var scheduler: HealthCheckScheduler
 
@@ -17,13 +17,34 @@ struct HeatmapWindow: View {
     @State private var hoverBucket: BucketKey? = nil
 
     var body: some View {
-        HSplitView {
-            sidebar
-                .frame(minWidth: 220, idealWidth: 240, maxWidth: 280)
-            heatmapPane
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "waveform.path.ecg")
+                    .foregroundStyle(.tint)
+                Text("Heatmap 7d — consolidado LLM HaTarim")
+                    .font(.callout.bold())
+                Spacer()
+                Button { reload() } label: {
+                    Image(systemName: "arrow.clockwise").font(.caption)
+                }
+                .buttonStyle(.borderless)
+                .help("Recarregar histórico")
+            }
+            Divider()
+            HStack(alignment: .top, spacing: 12) {
+                sidebar
+                    .frame(width: 220)
+                heatmapPane
+                    .frame(maxWidth: .infinity)
+            }
         }
-        .frame(minWidth: 880, minHeight: 560)
-        .background(Color(NSColor.windowBackgroundColor))
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
         .onAppear { reload() }
     }
 
@@ -60,18 +81,8 @@ struct HeatmapWindow: View {
 
                 Divider().padding(.vertical, 4)
 
-                Button {
-                    reload()
-                } label: {
-                    Label("Recarregar", systemImage: "arrow.clockwise")
-                        .frame(maxWidth: .infinity)
-                }
-
-                Spacer()
-
                 stats
             }
-            .padding(14)
         }
     }
 
@@ -103,8 +114,10 @@ struct HeatmapWindow: View {
     // MARK: - Main pane
 
     private var heatmapPane: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            header
+        VStack(alignment: .leading, spacing: 8) {
+            Text("X: dias  ·  Y: hora do dia 0–24h  ·  vermelho = saudável + ativo · azul = falhas / inatividade · brilho = densidade de hits")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
             HStack(alignment: .top, spacing: 8) {
                 yAxis
                 heatmapGrid
@@ -116,22 +129,6 @@ struct HeatmapWindow: View {
                 Spacer()
                 hoverInfo
             }
-        }
-        .padding(14)
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: "waveform.path.ecg")
-                    .foregroundStyle(.tint)
-                Text("Espectrograma de disponibilidade — 7 dias")
-                    .font(.title3.bold())
-                Spacer()
-            }
-            Text("X: dias  ·  Y: hora do dia 0–24h  ·  vermelho = saudável + ativo · azul = falhas / inatividade · brilho = densidade de hits")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 

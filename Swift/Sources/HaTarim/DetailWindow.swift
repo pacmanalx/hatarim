@@ -107,30 +107,21 @@ struct DetailWindow: View {
 
                 // Tier 4 — LLM Stack
                 section(L.t("LLM Stack", "Stack LLM"), icon: "checkmark.shield.fill", color: schedulerColor,
-                        subtitle: schedulerSubtitle,
-                        trailing: AnyView(
-                            Button {
-                                NSApp.activate(ignoringOtherApps: true)
-                                NotificationCenter.default.post(name: .openHeatmap, object: nil)
-                            } label: {
-                                Label(L.t("Heatmap 7d", "Heatmap 7d"), systemImage: "waveform.path.ecg")
-                                    .labelStyle(.titleAndIcon)
-                            }
-                            .controlSize(.small)
-                            .help(L.t("Open 7-day availability spectrogram (⌘H)",
-                                      "Abre o espectrograma de disponibilidade dos últimos 7 dias (⌘H)"))
-                        )) {
+                        subtitle: schedulerSubtitle) {
                     if servicesStore.config.services.isEmpty {
                         LazyVGrid(columns: adaptiveCols, spacing: 10) {
                             StackHealthEmptyCard().alignedTop()
                         }
                     } else {
-                        HStack(alignment: .top, spacing: 10) {
-                            StackHealthTable(services: servicesStore.config.services,
-                                             scheduler: healthScheduler)
-                                .frame(maxWidth: .infinity)
-                            CallLLMCard(services: servicesStore.config.services)
-                                .frame(maxWidth: .infinity)
+                        VStack(spacing: 10) {
+                            HStack(alignment: .top, spacing: 10) {
+                                StackHealthTable(services: servicesStore.config.services,
+                                                 scheduler: healthScheduler)
+                                    .frame(maxWidth: .infinity)
+                                CallLLMCard(services: servicesStore.config.services)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            HeatmapCard(store: servicesStore, scheduler: healthScheduler)
                         }
                     }
                 }

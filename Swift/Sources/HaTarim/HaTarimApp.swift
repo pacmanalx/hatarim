@@ -76,12 +76,6 @@ struct HaTarimApp: App {
         .defaultSize(width: 720, height: 560)
         .windowResizability(.contentMinSize)
 
-        Window(L.t("HaTarim — Heatmap 7d", "HaTarim — Heatmap 7d"), id: "heatmap") {
-            HeatmapWindow(store: servicesStore, scheduler: healthScheduler)
-        }
-        .defaultSize(width: 980, height: 640)
-        .windowResizability(.contentMinSize)
-
         Window(L.t("HaTarim — FAN Control", "HaTarim — Controle da FAN"), id: "fan") {
             FanControlWindow(store: fanStore, controller: fanController, bridge: stats.arduino)
         }
@@ -119,12 +113,6 @@ struct HaTarimApp: App {
                     NotificationCenter.default.post(name: .openSettings, object: nil)
                 }
                 .keyboardShortcut(",", modifiers: .command)
-
-                Button(L.t("Heatmap 7d…", "Heatmap 7d…")) {
-                    NSApp.activate(ignoringOtherApps: true)
-                    NotificationCenter.default.post(name: .openHeatmap, object: nil)
-                }
-                .keyboardShortcut("h", modifiers: .command)
 
                 Button(L.t("FAN Control…", "Controle da FAN…")) {
                     NSApp.activate(ignoringOtherApps: true)
@@ -185,7 +173,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 extension Notification.Name {
     static let reopenDetail = Notification.Name("HaTarim.reopenDetail")
     static let openSettings = Notification.Name("HaTarim.openSettings")
-    static let openHeatmap = Notification.Name("HaTarim.openHeatmap")
     static let openFan = Notification.Name("HaTarim.openFan")
     static let openAbout = Notification.Name("HaTarim.openAbout")
     static let fanControllerReady = Notification.Name("HaTarim.fanControllerReady")
@@ -201,9 +188,6 @@ struct ReopenObserver: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
                 openOrFocus(windowId: "settings")
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .openHeatmap)) { _ in
-                openOrFocus(windowId: "heatmap")
             }
             .onReceive(NotificationCenter.default.publisher(for: .openFan)) { _ in
                 openOrFocus(windowId: "fan")
