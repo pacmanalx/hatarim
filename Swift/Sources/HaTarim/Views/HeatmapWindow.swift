@@ -115,20 +115,18 @@ struct HeatmapCard: View {
 
     private var heatmapPane: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("X: dias  ·  Y: hora do dia 0–24h  ·  vermelho = saudável + ativo · azul = falhas / inatividade · brilho = densidade de hits")
+            Text("X: dias  ·  Y: hora do dia 0–24h  ·  amarelo = alta atividade + saudável · roxo escuro = inativo · cor magma com interpolação bilinear")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
             HStack(alignment: .top, spacing: 8) {
                 yAxis
                 heatmapGrid
+                colorbarVertical
             }
             xAxis
             Divider()
-            HStack(alignment: .top, spacing: 12) {
-                colorbarLegend
-                Spacer()
-                hoverInfo
-            }
+            hoverInfo
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
 
@@ -273,28 +271,67 @@ struct HeatmapCard: View {
 
     // MARK: - Legend & Hover
 
-    private var colorbarLegend: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Legenda").font(.caption.bold()).foregroundStyle(.secondary).textCase(.uppercase)
-            HStack(spacing: 0) {
-                ForEach(0..<40, id: \.self) { i in
-                    let t = Double(i) / 39.0
-                    let (r, g, b, _) = magmaRGB(t: t)
-                    Color(red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
-                        .frame(width: 6, height: 14)
+    /// Colorbar vertical no estilo matplotlib — barra de gradient à direita do heatmap,
+    /// com altura igual à do grid (24 linhas). Labels indicam atividade alta no topo
+    /// e inativo embaixo (alinhado ao Y do heatmap onde 23h = topo).
+    private var colorbarVertical: some View {
+        VStack(spacing: 4) {
+            Text("alta")
+                .font(.caption2.monospaced())
+                .foregroundStyle(.secondary)
+            // Gradient vertical: topo = magma(1.0), base = magma(0.0)
+            ZStack(alignment: .leading) {
+                if let cgImage = buildVerticalRampImage() {
+                    Image(decorative: cgImage, scale: 1, orientation: .up)
+                        .interpolation(.high)
+                        .resizable()
+                        .frame(width: 16)
                 }
             }
+            .frame(maxWidth: 16, maxHeight: .infinity)
             .clipShape(RoundedRectangle(cornerRadius: 2))
-            HStack {
-                Text("inativo").font(.caption2).foregroundStyle(.tertiary)
-                Spacer()
-                Text("alta atividade + saudável").font(.caption2).foregroundStyle(.tertiary)
-            }
-            .frame(width: 240)
-            Text("Cor combina densidade de hits × uptime · interpolação bilinear entre buckets")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            .overlay(
+                RoundedRectangle(cornerRadius: 2)
+                    .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
+            )
+            Text("inativo")
+                .font(.caption2.monospaced())
+                .foregroundStyle(.secondary)
         }
+        .frame(width: 48)
+    }
+
+    /// CGImage 1×64 com a rampa magma na vertical (top = 1.0, bottom = 0.0).
+    /// Quando esticado, vira gradient suave de cima pra baixo.
+    private func buildVerticalRampImage() -> CGImage? {
+        let W = 1
+        let H = 64
+        var pixels = [UInt8](repeating: 0, count: W * H * 4)
+        for y in 0..<H {
+            // y=0 (topo) = t=1.0 ; y=H-1 (base) = t=0.0
+            let t = 1.0 - Double(y) / Double(H - 1)
+            let (r, g, b, a) = magmaRGB(t: t)
+            let idx = y * W * 4
+            pixels[idx]     = r
+            pixels[idx + 1] = g
+            pixels[idx + 2] = b
+            pixels[idx + 3] = a
+        }
+        let data = Data(pixels)
+        guard let provider = CGDataProvider(data: data as CFData) else { return nil }
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+        return CGImage(
+            width: W, height: H,
+            bitsPerComponent: 8, bitsPerPixel: 32,
+            bytesPerRow: W * 4,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo,
+            provider: provider,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: .defaultIntent
+        )
     }
 
     private var hoverInfo: some View {
