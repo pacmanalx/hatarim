@@ -38,8 +38,8 @@ struct AboutWindow: View {
                     .font(.headline)
             }
             Text(L.t(
-                "**HaTarim** (התרים) is Biblical Hebrew for *the explorers* — from the verb *latur* (לתור, \"to scout out\"), the same root that became *tour* in Latin and English. Numbers 13:2 uses it for the twelve scouts Moses sends to reconnoiter Canaan.",
-                "**HaTarim** (התרים) é hebraico bíblico pra *os exploradores* — do verbo *latur* (לתור, \"explorar, reconhecer\"), a mesma raiz que virou *tour* em latim e inglês. Números 13:2 usa o termo pros doze espiões que Moisés envia pra reconhecer Canaã."
+                "**HaTarim** (התרים) is Torah Hebrew for *the explorers* — from the verb *latur* (לתור, \"to scout out\"), the same root that became *tour* in Latin and English. *Bamidbar* (Numbers) 13:2 uses it for the twelve scouts Moses sends to reconnoiter Canaan.",
+                "**HaTarim** (התרים) é hebraico da Torá pra *os exploradores* — do verbo *latur* (לתור, \"explorar, reconhecer\"), a mesma raiz que virou *tour* em latim e inglês. *Bamidbar* (Números) 13:2 usa o termo pros doze espiões que Moisés envia pra reconhecer Canaã."
             ))
             .font(.caption)
             .foregroundStyle(.secondary)

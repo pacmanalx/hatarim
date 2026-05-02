@@ -8,9 +8,9 @@
 >
 > Stop hopping between 6 terminal tabs. See it all in one window.
 
-The name **HaTarim** (התרים) is Biblical Hebrew for *"the explorers"* — from the verb **לתור**
+The name **HaTarim** (התרים) is Torah Hebrew for *"the explorers"* — from the verb **לתור**
 (*latur*, "to explore, scout out"), the same root that later became *"tour"* in Latin and English.
-It's the word used in Numbers 13:2, when Moses sends twelve scouts to reconnoiter the land of Canaan.
+It's the word used in *Bamidbar* (Numbers) 13:2, when Moses sends twelve scouts to reconnoiter the land of Canaan.
 The app fits the metaphor: a single-window scout reporting back from your machine — what's listening on
 which port, what's calling out to where, how hot the chip is, whether Ollama answered. *Take a tour of
 your stack.*
@@ -371,7 +371,7 @@ GPL v3.0 — see [LICENSE.md](LICENSE.md) for the full text and notes on third-p
 
 ## Status
 
-This is **beta software**, currently at version `0.4.12`. The core dashboard and Arduino bridge are stable
+This is **beta software**, currently at version `0.4.13`. The core dashboard and Arduino bridge are stable
 and used daily by the author on a Mac mini and a MacBook Air. Public v1.0 release is planned for
 **week of 2026-05-08**.
 
