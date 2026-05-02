@@ -4,6 +4,13 @@
 >
 > Stop hopping between 6 terminal tabs. See it all in one window.
 
+The name **HaTarim** (התרים) is Biblical Hebrew for *"the explorers"* — from the verb **לתור**
+(*latur*, "to explore, scout out"), the same root that later became *"tour"* in Latin and English.
+It's the word used in Numbers 13:2, when Moses sends twelve scouts to reconnoiter the land of Canaan.
+The app fits the metaphor: a single-window scout reporting back from your machine — what's listening on
+which port, what's calling out to where, how hot the chip is, whether Ollama answered. *Take a tour of
+your stack.*
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 [![Platform: macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)]()
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-required-orange.svg)]()
@@ -367,13 +374,3 @@ and used daily by the author on a Mac mini and a MacBook Air. Public v1.0 releas
 If you're trying it out, please [open an issue](https://github.com/pacmanalx/hatarim/issues)
 with feedback — bugs, feature requests, anything.
 
-## Origin of the name
-
-**HaTarim** (התרים) is Biblical Hebrew for *"the explorers"* — from the verb **לתור** (*latur*, "to explore,
-scout out"), the same root that became "tour" in Latin and English. It's the word used in Numbers 13:2,
-when Moses sends twelve scouts to reconnoiter the land of Canaan.
-
-The name fits what this app does: it's a single-window scout reporting back from your machine — what's
-listening on which port, what's calling out to where, how hot the chip is, whether Ollama answered.
-
-> *"Take a tour of your stack."*
