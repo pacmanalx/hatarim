@@ -1,4 +1,4 @@
-// MonitorINO_V2 firmware — Protocolo v2 (linha-única + checksum XOR + ACK)
+// HaTarim firmware — Protocolo v2 (linha-única + checksum XOR + ACK)
 // Display: MCUFRIEND TFT 240x320 ILI9341 sobre Arduino Mega 2560.
 //
 // Spec do protocolo: project_arduino_protocolo.md (RAG)
@@ -177,7 +177,7 @@ void drawCpuIconLarge(int cx, int cy, uint16_t color) {
 void drawSplash() {
     tft.fillScreen(C_BG);
     drawCpuIconLarge(TFT_W / 2, 110, C_CYAN);
-    const char *name = "MonitorINO";
+    const char *name = "HaTarim";
     int nameLen = (int)strlen(name);
     int nameW = nameLen * 18;
     int nameX = (TFT_W - nameW) / 2;

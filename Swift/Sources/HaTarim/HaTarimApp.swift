@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 
 @main
-struct MonitorINO2App: App {
+struct HaTarimApp: App {
     @StateObject private var stats: SystemStats
     @StateObject private var servicesStore: ServicesStore
     @StateObject private var healthScheduler: HealthCheckScheduler
@@ -17,7 +17,7 @@ struct MonitorINO2App: App {
         // e o FanController em produção sem precisar rodar o binário no terminal.
         let fm = FileManager.default
         if let logsDir = fm.urls(for: .libraryDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("Logs/MonitorINO2", isDirectory: true) {
+            .appendingPathComponent("Logs/HaTarim", isDirectory: true) {
             try? fm.createDirectory(at: logsDir, withIntermediateDirectories: true)
             let logURL = logsDir.appendingPathComponent("activity.log")
             // append mode, line-buffered
@@ -30,7 +30,7 @@ struct MonitorINO2App: App {
         if !Platform.isAppleSilicon {
             let alert = NSAlert()
             alert.alertStyle = .critical
-            alert.messageText = "MonitorINO2 requer Apple Silicon"
+            alert.messageText = "HaTarim requer Apple Silicon"
             alert.informativeText = "Este app só roda em Macs com chip Apple (M1 ou superior)."
             alert.runModal()
             NSApp.terminate(nil)
@@ -63,30 +63,30 @@ struct MonitorINO2App: App {
         }
         .menuBarExtraStyle(.menu)
 
-        Window(L.t("MonitorINO2 — Details", "MonitorINO2 — Detalhes"), id: "detail") {
+        Window(L.t("HaTarim — Details", "HaTarim — Detalhes"), id: "detail") {
             DetailWindow(stats: stats, servicesStore: servicesStore, healthScheduler: healthScheduler)
         }
         .defaultSize(width: 760, height: 560)
         .windowResizability(.contentMinSize)
 
-        Window(L.t("MonitorINO2 — Configuration", "MonitorINO2 — Configuração"), id: "settings") {
+        Window(L.t("HaTarim — Configuration", "HaTarim — Configuração"), id: "settings") {
             SettingsWindow(store: servicesStore, scheduler: healthScheduler)
         }
         .defaultSize(width: 720, height: 560)
         .windowResizability(.contentMinSize)
 
-        Window(L.t("MonitorINO2 — Heatmap 7d", "MonitorINO2 — Heatmap 7d"), id: "heatmap") {
+        Window(L.t("HaTarim — Heatmap 7d", "HaTarim — Heatmap 7d"), id: "heatmap") {
             HeatmapWindow(store: servicesStore, scheduler: healthScheduler)
         }
         .defaultSize(width: 980, height: 640)
         .windowResizability(.contentMinSize)
 
-        Window(L.t("MonitorINO2 — FAN Control", "MonitorINO2 — Controle da FAN"), id: "fan") {
+        Window(L.t("HaTarim — FAN Control", "HaTarim — Controle da FAN"), id: "fan") {
             FanControlWindow(store: fanStore, controller: fanController, bridge: stats.arduino)
         }
         .defaultSize(width: 720, height: 760)
         .windowResizability(.contentMinSize)
-        Window(L.t("About MonitorINO2", "Sobre o MonitorINO2"), id: "about") {
+        Window(L.t("About HaTarim", "Sobre o HaTarim"), id: "about") {
             AboutWindow()
         }
         .defaultSize(width: 520, height: 720)
@@ -94,7 +94,7 @@ struct MonitorINO2App: App {
         .commands {
             CommandGroup(replacing: .newItem) { }
             CommandGroup(replacing: .appInfo) {
-                Button(L.t("About MonitorINO2", "Sobre o MonitorINO2")) {
+                Button(L.t("About HaTarim", "Sobre o HaTarim")) {
                     NSApp.activate(ignoringOtherApps: true)
                     NotificationCenter.default.post(name: .openAbout, object: nil)
                 }
@@ -182,12 +182,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension Notification.Name {
-    static let reopenDetail = Notification.Name("MonitorINO2.reopenDetail")
-    static let openSettings = Notification.Name("MonitorINO2.openSettings")
-    static let openHeatmap = Notification.Name("MonitorINO2.openHeatmap")
-    static let openFan = Notification.Name("MonitorINO2.openFan")
-    static let openAbout = Notification.Name("MonitorINO2.openAbout")
-    static let fanControllerReady = Notification.Name("MonitorINO2.fanControllerReady")
+    static let reopenDetail = Notification.Name("HaTarim.reopenDetail")
+    static let openSettings = Notification.Name("HaTarim.openSettings")
+    static let openHeatmap = Notification.Name("HaTarim.openHeatmap")
+    static let openFan = Notification.Name("HaTarim.openFan")
+    static let openAbout = Notification.Name("HaTarim.openAbout")
+    static let fanControllerReady = Notification.Name("HaTarim.fanControllerReady")
 }
 
 struct ReopenObserver: View {

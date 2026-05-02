@@ -3,7 +3,7 @@ import Darwin
 import IOKit
 import IOKit.ps
 
-/// Despacha telemetria pro Arduino MonitorIno usando o protocolo v2.
+/// Despacha telemetria pro Arduino HaTarim usando o protocolo v2.
 ///
 /// Cadência sender-controlled (Mac decide quando manda cada token).
 /// Cada chamada `tick()`:

@@ -1,4 +1,4 @@
-# MonitorINO²
+# HaTarim
 
 > **A dev cockpit for macOS developers building Web + AI**
 >
@@ -13,7 +13,7 @@
 
 ## What is this?
 
-**MonitorINO²** is a single-window system dashboard for macOS developers who run their stack locally —
+**HaTarim** is a single-window system dashboard for macOS developers who run their stack locally —
 backends, databases, vector stores, local LLMs, all on the same machine. Instead of opening five terminal
 tabs to run `lsof`, `top`, `df`, `ifconfig`, and `curl http://localhost:11434`, you get one cockpit.
 
@@ -57,7 +57,7 @@ The Arduino bridge is **opt-in**. The dashboard works fine without any external 
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  MonitorINO².app  (Swift + SwiftUI + AppKit)         │
+│  HaTarim.app  (Swift + SwiftUI + AppKit)         │
 │                                                      │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐ │
 │  │ Tier 1   │ │ Tier 2   │ │ Tier 3   │ │ Tier    │ │
@@ -114,16 +114,16 @@ or hardware is missing.
 ### Quick install (recommended — build from source)
 
 ```bash
-git clone https://github.com/<your-username>/MonitorINO_V2.git
-cd MonitorINO_V2/Swift
+git clone https://github.com/<your-username>/HaTarim.git
+cd HaTarim/Swift
 ./install.sh
 ```
 
 The installer:
 1. Verifies you're on Apple Silicon and have `swift` available
 2. Builds the release binary (`swift build -c release`)
-3. Packages `MonitorINO2.app` with `Info.plist`, ad-hoc codesigns it
-4. Installs into `~/Applications/MonitorINO2.app`
+3. Packages `HaTarim.app` with `Info.plist`, ad-hoc codesigns it
+4. Installs into `~/Applications/HaTarim.app`
 5. Creates a `LaunchAgent` so it starts on login
 
 ### Drag-to-Applications DMG (planned)
@@ -134,13 +134,13 @@ for status.
 
 ### Logs
 
-- Activity log: `~/Library/Logs/MonitorINO2/activity.log`
-- LaunchAgent stdout/stderr: `/tmp/monitorino2.{log,err}`
+- Activity log: `~/Library/Logs/HaTarim/activity.log`
+- LaunchAgent stdout/stderr: `/tmp/hatarim.{log,err}`
 
 ### Uninstall
 
 ```bash
-cd MonitorINO_V2/Swift
+cd HaTarim/Swift
 ./uninstall.sh
 ```
 
@@ -174,14 +174,14 @@ locally-built binary.
 
 ## Configuration
 
-All settings persist in `UserDefaults` (`~/Library/Preferences/com.pacman.monitorino2.plist`):
+All settings persist in `UserDefaults` (`~/Library/Preferences/com.pacman.hatarim.plist`):
 
 - **Refresh rate**: configurable from 0.25 s to 60 s (10 presets in the toolbar timer menu)
 - **Window opacity** (0–100 %, slider in toolbar)
 - **Cards opacity** (0–100 %, independent slider) — see desktop through individual cards
 - **Always on top** — toggle in toolbar (uses `NSWindow.level = .floating`)
 - **Show local addresses** — checkbox in Connections cards. Off by default to hide LAN/loopback noise.
-- **LLM Stack services** — JSON file at `~/Library/Application Support/MonitorINO2/services.json`. Edit in the bundled `Settings` window.
+- **LLM Stack services** — JSON file at `~/Library/Application Support/HaTarim/services.json`. Edit in the bundled `Settings` window.
 
 ---
 
@@ -274,8 +274,8 @@ The firmware lives in `Arduino/` and builds with PlatformIO. Wiring guide and pr
 ## Building from source
 
 ```bash
-git clone https://github.com/<your-username>/MonitorINO_V2.git
-cd MonitorINO_V2/Swift
+git clone https://github.com/<your-username>/HaTarim.git
+cd HaTarim/Swift
 
 # Build only
 swift build -c release
@@ -291,20 +291,20 @@ Targets:
 - macOS 13.0+ (declared in `Package.swift`)
 - Apple Silicon arm64
 
-The Swift package has a single executable target `MonitorINO2` with resources processed via `.process("Resources")`.
+The Swift package has a single executable target `HaTarim` with resources processed via `.process("Resources")`.
 
 ---
 
 ## Project structure
 
 ```
-MonitorINO_V2/
+HaTarim/
 ├── Swift/                          # Main macOS app
 │   ├── Package.swift               # SPM manifest
 │   ├── install.sh                  # Build + install + LaunchAgent
 │   ├── uninstall.sh
-│   └── Sources/MonitorINO2/
-│       ├── MonitorINO2App.swift    # App entry point + AppDelegate
+│   └── Sources/HaTarim/
+│       ├── HaTarimApp.swift    # App entry point + AppDelegate
 │       ├── DetailWindow.swift      # 5-tier dashboard view
 │       ├── AboutWindow.swift       # About scene
 │       ├── SystemStats.swift       # ObservableObject — central state
@@ -360,13 +360,13 @@ GPL v3.0 — see [LICENSE.md](LICENSE.md) for the full text and notes on third-p
 
 ## Status
 
-This is **beta software**, currently at version `0.5.9`. The core dashboard and Arduino bridge are stable
+This is **beta software**, currently at version `0.4.9`. The core dashboard and Arduino bridge are stable
 and used daily by the author on a Mac mini and a MacBook Air. Public v1.0 release is planned for
 **week of 2026-05-08**.
 
-If you're trying it out, please [open an issue](https://github.com/<your-username>/MonitorINO_V2/issues)
+If you're trying it out, please [open an issue](https://github.com/<your-username>/HaTarim/issues)
 with feedback — bugs, feature requests, anything.
 
-> **Note on the project name**: "MonitorINO²" may be renamed before v1.0 release — the "INO" suffix can
+> **Note on the project name**: "HaTarim" may be renamed before v1.0 release — the "INO" suffix can
 > be confused with Arduino's `.ino` files. Working candidates: **Glance**, **Radar**, **Axis**. Decision
 > pending; the GitHub repo URL may be updated accordingly.

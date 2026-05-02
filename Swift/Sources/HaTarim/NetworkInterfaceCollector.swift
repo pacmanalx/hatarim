@@ -243,7 +243,7 @@ final class NetworkInterfaceCollector {
     }
 
     private func primaryInterfaceName() -> String? {
-        guard let store = SCDynamicStoreCreate(nil, "MonitorINO2.NetCollector" as CFString, nil, nil),
+        guard let store = SCDynamicStoreCreate(nil, "HaTarim.NetCollector" as CFString, nil, nil),
               let dict = SCDynamicStoreCopyValue(store, "State:/Network/Global/IPv4" as CFString) as? [String: Any],
               let primary = dict["PrimaryInterface"] as? String else {
             return nil

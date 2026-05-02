@@ -1,11 +1,11 @@
 import Foundation
 import Combine
 
-/// Bridge pro Arduino via daemon Python (`monitorino_daemon.py`).
+/// Bridge pro Arduino via daemon Python (`hatarim_daemon.py`).
 ///
 /// O Swift NÃO abre serial. Em vez disso:
-///   - escreve comandos como arquivos em `~/Library/Application Support/MonitorINO2/send_commands/`
-///   - lê heartbeat do daemon em `~/Library/Application Support/MonitorINO2/daemon_status.json`
+///   - escreve comandos como arquivos em `~/Library/Application Support/HaTarim/send_commands/`
+///   - lê heartbeat do daemon em `~/Library/Application Support/HaTarim/daemon_status.json`
 ///
 /// O heartbeat dita o `health` real do bridge — sem heartbeat fresco a UI fica
 /// `.idle` (modo monitor sem hardware) e o bridge SUSPENDE a escrita de
@@ -51,7 +51,7 @@ final class ArduinoBridge: ObservableObject {
     init() {
         let fm = FileManager.default
         let support = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let base = support.appendingPathComponent("MonitorINO2", isDirectory: true)
+        let base = support.appendingPathComponent("HaTarim", isDirectory: true)
         sendDir = base.appendingPathComponent("send_commands", isDirectory: true)
         statusURL = base.appendingPathComponent("daemon_status.json")
         try? fm.createDirectory(at: sendDir, withIntermediateDirectories: true)

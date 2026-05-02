@@ -1,6 +1,6 @@
 import Foundation
 
-/// Protocolo MonitorIno v2 — linha-única + checksum XOR + ACK.
+/// Protocolo HaTarim v2 — linha-única + checksum XOR + ACK.
 ///
 /// Formato wire: `TOKEN:VALOR;XX\n`
 ///   - `TOKEN`: 1-8 chars ASCII

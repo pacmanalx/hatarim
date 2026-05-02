@@ -1,19 +1,19 @@
 #!/bin/bash
-# install.sh - Instala MonitorINO2 como app de boot (LaunchAgent) no macOS.
+# install.sh - Instala HaTarim como app de boot (LaunchAgent) no macOS.
 # Compila do source, empacota .app, copia pra ~/Applications/, cria LaunchAgent.
 # Sem sudo, sem rede.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_NAME="MonitorINO2"
+APP_NAME="HaTarim"
 APP_BUNDLE="${APP_NAME}.app"
 INSTALL_DIR="$HOME/Applications"
 LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
-LABEL="com.pacman.monitorino2"
+LABEL="com.pacman.hatarim"
 PLIST="$LAUNCH_AGENT_DIR/$LABEL.plist"
-BUNDLE_VERSION="0.5.9"
+BUNDLE_VERSION="0.4.9"
 
-echo "==> MonitorINO2 installer"
+echo "==> HaTarim installer"
 
 # 0. Pré-flight: Apple Silicon + Swift toolchain
 if [[ "$(uname -m)" != "arm64" ]]; then
@@ -26,6 +26,29 @@ if ! command -v swift >/dev/null 2>&1; then
 fi
 
 cd "$SCRIPT_DIR"
+
+# 0a. Migration MonitorINO2 → HaTarim (rebrand v0.4.9)
+# Se existe config antiga em ~/Library/Application Support/MonitorINO2/ e o
+# diretório novo HaTarim/ ainda não foi criado, move pra preservar config viva
+# (services.json, fan_config.json, health_history.json).
+OLD_SUPPORT="$HOME/Library/Application Support/MonitorINO2"
+NEW_SUPPORT="$HOME/Library/Application Support/HaTarim"
+if [[ -d "$OLD_SUPPORT" && ! -d "$NEW_SUPPORT" ]]; then
+    echo "==> Migrando config de MonitorINO2/ → HaTarim/"
+    mv "$OLD_SUPPORT" "$NEW_SUPPORT"
+fi
+OLD_LOGS="$HOME/Library/Logs/MonitorINO2"
+NEW_LOGS="$HOME/Library/Logs/HaTarim"
+if [[ -d "$OLD_LOGS" && ! -d "$NEW_LOGS" ]]; then
+    echo "==> Migrando logs de MonitorINO2/ → HaTarim/"
+    mv "$OLD_LOGS" "$NEW_LOGS"
+fi
+OLD_LABEL_PLIST="$HOME/Library/LaunchAgents/com.pacman.monitorino2.plist"
+if [[ -f "$OLD_LABEL_PLIST" ]]; then
+    echo "==> Removendo LaunchAgent antigo (com.pacman.monitorino2)"
+    launchctl unload "$OLD_LABEL_PLIST" 2>/dev/null || true
+    rm -f "$OLD_LABEL_PLIST"
+fi
 
 # 1. Compila release
 echo "==> swift build -c release (pode demorar na primeira vez)"
@@ -116,9 +139,9 @@ cat > "$PLIST" <<EOF
     <integer>10</integer>
 
     <key>StandardOutPath</key>
-    <string>/tmp/monitorino2.log</string>
+    <string>/tmp/hatarim.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/monitorino2.err</string>
+    <string>/tmp/hatarim.err</string>
 </dict>
 </plist>
 EOF
@@ -129,15 +152,15 @@ sleep 1
 
 if launchctl list | grep -q "${LABEL}"; then
     echo ""
-    echo "==> MonitorINO2 instalado e rodando!"
+    echo "==> HaTarim instalado e rodando!"
     echo "    Bundle:  ${INSTALL_DIR}/${APP_BUNDLE}"
     echo "    Plist:   $PLIST"
-    echo "    Logs:    /tmp/monitorino2.{log,err}"
+    echo "    Logs:    /tmp/hatarim.{log,err}"
     echo ""
     echo "    Parar:    launchctl unload \"$PLIST\""
     echo "    Iniciar:  launchctl load   \"$PLIST\""
     echo "    Remover:  ./uninstall.sh"
 else
-    echo "ERRO: LaunchAgent não iniciou — checar /tmp/monitorino2.err" >&2
+    echo "ERRO: LaunchAgent não iniciou — checar /tmp/hatarim.err" >&2
     exit 1
 fi

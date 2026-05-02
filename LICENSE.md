@@ -1,6 +1,6 @@
 # License
 
-**MonitorINO² is free software** licensed under the **GNU General Public License v3.0 (GPLv3)**.
+**HaTarim is free software** licensed under the **GNU General Public License v3.0 (GPLv3)**.
 
 You are free to use, study, modify, and redistribute this software, provided that derivative works
 remain under the same license. See the full license text below or at <https://www.gnu.org/licenses/gpl-3.0.html>.
@@ -688,7 +688,7 @@ Public License instead of this License.  But first, please read
 
 ## Third-party assets
 
-The bundled image assets in `Swift/Sources/MonitorINO2/Resources/`:
+The bundled image assets in `Swift/Sources/HaTarim/Resources/`:
 
 - **`renegados.png`** — "Renegados Hacker Clube" floppy disk artwork. Used with permission of the club.
 - **`bytecrackers.png`** — "Bytecrackers" group logo. Designed by **Claudio H. Piccolo**, used with permission.

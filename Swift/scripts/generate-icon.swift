@@ -1,6 +1,6 @@
 #!/usr/bin/env swift
 
-// Gera AppIcon.icns para MonitorINO2.
+// Gera AppIcon.icns para HaTarim.
 //
 // Conceito: "Chip + onda térmica" — chip QFP no centro de um squircle estilo
 // macOS, com plumas térmicas (gradiente laranja→amarelo→ciano→azul) subindo

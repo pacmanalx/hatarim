@@ -9,7 +9,7 @@ Uso:
     python3 fan_test.py
     python3 fan_test.py --port /dev/cu.usbmodem2201
 
-IMPORTANTE: feche o MonitorINO2.app antes (ele segura a serial).
+IMPORTANTE: feche o HaTarim.app antes (ele segura a serial).
 """
 from __future__ import annotations
 import argparse

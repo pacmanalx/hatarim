@@ -1,13 +1,13 @@
 #!/bin/bash
-# build-app.sh — compila o executável Swift e empacota como MonitorINO2.app
+# build-app.sh — compila o executável Swift e empacota como HaTarim.app
 # Idempotente: pode rodar quantas vezes quiser.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-APP_NAME="MonitorINO2"
+APP_NAME="HaTarim"
 APP_DIR="${APP_NAME}.app"
-BUNDLE_ID="com.pacman.monitorino2"
+BUNDLE_ID="com.pacman.hatarim"
 VERSION="0.3.0"
 
 echo "==> swift build -c release"

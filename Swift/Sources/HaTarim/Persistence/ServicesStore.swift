@@ -5,7 +5,7 @@ final class ServicesStore: ObservableObject {
     @Published var config: ServicesConfig
 
     private let fileURL: URL
-    private let queue = DispatchQueue(label: "monitorino2.services-store", qos: .utility)
+    private let queue = DispatchQueue(label: "hatarim.services-store", qos: .utility)
 
     init(fileURL: URL? = nil) {
         let url = fileURL ?? Self.defaultURL()
@@ -28,7 +28,7 @@ final class ServicesStore: ObservableObject {
         let fm = FileManager.default
         let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
-        let dir = appSupport.appendingPathComponent("MonitorINO2", isDirectory: true)
+        let dir = appSupport.appendingPathComponent("HaTarim", isDirectory: true)
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("services.json")
     }

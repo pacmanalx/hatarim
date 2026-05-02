@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
 fan_daemon.py — daemon que mantém a serial aberta e processa comandos
-escritos como arquivos em ~/Library/Application Support/MonitorINO2/send_commands/.
+escritos como arquivos em ~/Library/Application Support/HaTarim/send_commands/.
 
 Cada arquivo contém uma linha "TOKEN:VALOR" (ex: "FAN:1"). O daemon:
   1. Abre serial UMA VEZ (5s pra Mega bootar; subsequente sem reset)
   2. Loop: lista arquivos, ordena por nome, lê, encoda com checksum, manda,
      espera ACK, apaga o arquivo
-  3. Logs em ~/Library/Logs/MonitorINO2/fan_daemon.log
+  3. Logs em ~/Library/Logs/HaTarim/fan_daemon.log
 
 Uso:
     python3 fan_daemon.py
@@ -25,8 +25,8 @@ import serial
 
 
 HOME = Path.home()
-SEND_DIR = HOME / "Library" / "Application Support" / "MonitorINO2" / "send_commands"
-LOG_DIR = HOME / "Library" / "Logs" / "MonitorINO2"
+SEND_DIR = HOME / "Library" / "Application Support" / "HaTarim" / "send_commands"
+LOG_DIR = HOME / "Library" / "Logs" / "HaTarim"
 LOG_FILE = LOG_DIR / "fan_daemon.log"
 
 

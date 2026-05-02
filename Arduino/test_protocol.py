@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-test_protocol.py — Test harness pro protocolo MonitorIno v2.
+test_protocol.py — Test harness pro protocolo HaTarim v2.
 
 Spec: TOKEN:VALOR;XX\n
   - XX = XOR cumulativo de TOKEN:VALOR; em hex 2 chars uppercase
@@ -341,7 +341,7 @@ def main():
     args = p.parse_args()
 
     port = args.port or find_port()
-    print(f"=== MonitorINO Protocol Tester v2 ===")
+    print(f"=== HaTarim Protocol Tester v2 ===")
     print(f"Porta: {port}")
 
     client = ProtocolClient(port)

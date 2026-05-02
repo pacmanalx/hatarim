@@ -117,8 +117,8 @@ final class SystemInfoCollector {
             if let slash = name.lastIndex(of: "/") {
                 name = String(name[name.index(after: slash)...])
             }
-            // ignorar o próprio MonitorINO2 e processo "ps"
-            if name == "MonitorINO2" || name == "ps" { continue }
+            // ignorar o próprio HaTarim e processo "ps"
+            if name == "HaTarim" || name == "ps" { continue }
             return (name, cpu)
         }
         return nil

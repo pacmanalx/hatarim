@@ -15,7 +15,7 @@ final class DNSResolver {
     private var cache: [String: CacheEntry] = [:]
     private var inFlight: Set<String> = []
     private let lock = NSLock()
-    private let queue = DispatchQueue(label: "MonitorINO2.DNSResolver", qos: .utility, attributes: .concurrent)
+    private let queue = DispatchQueue(label: "HaTarim.DNSResolver", qos: .utility, attributes: .concurrent)
 
     /// TTL do cache — depois disso re-resolve. 30 min é razoável (DNS privado raramente muda).
     private static let cacheTTL: TimeInterval = 30 * 60

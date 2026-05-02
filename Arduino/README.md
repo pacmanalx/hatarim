@@ -1,6 +1,6 @@
-# Arduino — firmware MonitorINO_V2
+# Arduino — firmware HaTarim
 
-Firmware do display físico, **idêntico ao v1**: parser do protocolo serial + render no TFT 240x320 + LCD RGB 16x2. Foi copiado de `/Volumes/512Gb(SSD)/dev/PlatformIO/MonitorIno/`.
+Firmware do display físico, **idêntico ao v1**: parser do protocolo serial + render no TFT 240x320 + LCD RGB 16x2. Foi copiado de `/Volumes/512Gb(SSD)/dev/PlatformIO/HaTarim/`.
 
 ## Hardware
 
@@ -26,7 +26,7 @@ T:{temp}|C:{c0,c1,...}|E:{nEcores}|G:{gpu%}|M:{mem%}|D:{disk%}|U:{up_MB/s}|N:{dn
 
 E-cores **vêm primeiro** em `C:`. Cores `S:` são RGB565 hex de 4 chars (ex.: `07E0`=verde). Buffer firmware = 256 bytes.
 
-Quem manda os dados agora é o **app Swift** (`../Swift/MonitorINO2.app`), não mais o `monitor.py` do v1.
+Quem manda os dados agora é o **app Swift** (`../Swift/HaTarim.app`), não mais o `monitor.py` do v1.
 
 ## Build via CLI (sem VS Code)
 

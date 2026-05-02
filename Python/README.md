@@ -2,7 +2,7 @@
 
 A definir. Possíveis papéis:
 
-- **Host coletor** rodando em paralelo (reaproveitando `monitor.py` do MonitorIno v1) e enviando dados pro Swift via socket Unix ou JSON em arquivo
+- **Host coletor** rodando em paralelo (reaproveitando `monitor.py` do HaTarim v1) e enviando dados pro Swift via socket Unix ou JSON em arquivo
 - **IPC bridge** caso decidamos manter parte da telemetria em Python
 - **Scripts auxiliares** (instalador LaunchAgent, ferramentas de debug, etc)
 

@@ -2,11 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "MonitorINO2",
+    name: "HaTarim",
     platforms: [.macOS(.v13)],
     targets: [
         .executableTarget(
-            name: "MonitorINO2",
+            name: "HaTarim",
             resources: [
                 .process("Resources")
             ]

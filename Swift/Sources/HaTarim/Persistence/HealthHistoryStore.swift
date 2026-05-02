@@ -31,7 +31,7 @@ final class HealthHistoryStore: ObservableObject {
     @Published private(set) var totalEntries: Int = 0
 
     private let fileURL: URL
-    private let queue = DispatchQueue(label: "monitorino2.history-store", qos: .utility)
+    private let queue = DispatchQueue(label: "hatarim.history-store", qos: .utility)
     private var sweepTimer: Timer?
 
     static let retentionDays: TimeInterval = 7
@@ -41,7 +41,7 @@ final class HealthHistoryStore: ObservableObject {
         let fm = FileManager.default
         let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
-        let dir = appSupport.appendingPathComponent("MonitorINO2", isDirectory: true)
+        let dir = appSupport.appendingPathComponent("HaTarim", isDirectory: true)
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("history.jsonl")
     }

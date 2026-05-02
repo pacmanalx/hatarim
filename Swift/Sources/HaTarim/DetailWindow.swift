@@ -1597,7 +1597,7 @@ private struct ArduinoCard: View {
 
                 switch bridge.health {
                 case .idle:
-                    Text("Modo monitor — sem Arduino conectado neste Mac. O daemon `monitorino_daemon.py` não está rodando.")
+                    Text("Modo monitor — sem Arduino conectado neste Mac. O daemon `hatarim_daemon.py` não está rodando.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

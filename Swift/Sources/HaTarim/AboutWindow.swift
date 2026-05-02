@@ -33,7 +33,7 @@ struct AboutWindow: View {
                 .resizable()
                 .interpolation(.high)
                 .frame(width: 96, height: 96)
-            Text("MonitorINO²")
+            Text("HaTarim")
                 .font(.system(size: 26, weight: .bold))
             Text(L.t("Version \(version)", "Versão \(version)"))
                 .font(.system(.callout, design: .monospaced))

@@ -1,15 +1,15 @@
 #!/bin/bash
-# uninstall.sh - Remove MonitorINO2 do macOS (LaunchAgent + .app + logs).
+# uninstall.sh - Remove HaTarim do macOS (LaunchAgent + .app + logs).
 set -euo pipefail
 
-APP_NAME="MonitorINO2"
+APP_NAME="HaTarim"
 APP_BUNDLE="${APP_NAME}.app"
 INSTALL_DIR="$HOME/Applications"
 LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
-LABEL="com.pacman.monitorino2"
+LABEL="com.pacman.hatarim"
 PLIST="$LAUNCH_AGENT_DIR/$LABEL.plist"
 
-echo "==> MonitorINO2 uninstaller"
+echo "==> HaTarim uninstaller"
 
 # 1. Para LaunchAgent (se existir)
 if [[ -f "$PLIST" ]]; then
@@ -29,7 +29,7 @@ if [[ -d "${INSTALL_DIR}/${APP_BUNDLE}" ]]; then
 fi
 
 # 4. Logs
-rm -f /tmp/monitorino2.log /tmp/monitorino2.err
+rm -f /tmp/hatarim.log /tmp/hatarim.err
 
 # 5. Verifica
 if launchctl list | grep -q "${LABEL}"; then
@@ -41,4 +41,4 @@ if pgrep -x "$APP_NAME" >/dev/null 2>&1; then
     exit 1
 fi
 
-echo "==> MonitorINO2 desinstalado."
+echo "==> HaTarim desinstalado."

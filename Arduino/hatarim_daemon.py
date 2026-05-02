@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-monitorino_daemon.py — daemon de comunicação serial pro MonitorINO.
+hatarim_daemon.py — daemon de comunicação serial pro HaTarim.
 
 Mantém UMA conexão serial aberta com o Mega (sem auto-reset entre comandos)
-e processa arquivos escritos em ~/Library/Application Support/MonitorINO2/send_commands/.
+e processa arquivos escritos em ~/Library/Application Support/HaTarim/send_commands/.
 
 Cada arquivo contém uma linha "TOKEN:VALOR". Daemon:
   1. Lista arquivos, ORDENA POR NOME (prefixos 00_ vêm antes de 99_)
@@ -15,8 +15,8 @@ Convenção de nomes:
   cmd_99_<ts>_<token>.txt   → telemetria — baixa prioridade
 
 Uso:
-    python3 monitorino_daemon.py
-    python3 monitorino_daemon.py --baud 115200
+    python3 hatarim_daemon.py
+    python3 hatarim_daemon.py --baud 115200
 """
 from __future__ import annotations
 import argparse
@@ -31,12 +31,12 @@ import serial
 
 
 HOME = Path.home()
-SUPPORT_DIR = HOME / "Library" / "Application Support" / "MonitorINO2"
+SUPPORT_DIR = HOME / "Library" / "Application Support" / "HaTarim"
 SEND_DIR = SUPPORT_DIR / "send_commands"
 STATUS_FILE = SUPPORT_DIR / "daemon_status.json"
 STATUS_TMP = SUPPORT_DIR / "daemon_status.json.tmp"
-LOG_DIR = HOME / "Library" / "Logs" / "MonitorINO2"
-LOG_FILE = LOG_DIR / "monitorino_daemon.log"
+LOG_DIR = HOME / "Library" / "Logs" / "HaTarim"
+LOG_FILE = LOG_DIR / "hatarim_daemon.log"
 
 # Stats rolling pra resumo periódico
 _stats = {"sent": 0, "ok": 0, "fail": 0}
@@ -178,7 +178,7 @@ def main() -> int:
     SEND_DIR.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-    log(f"=== monitorino_daemon START ===")
+    log(f"=== hatarim_daemon START ===")
     _status["baud"] = args.baud
     write_status(force=True)
     port = args.port or find_port_blocking()

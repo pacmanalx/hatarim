@@ -201,7 +201,7 @@ struct OllamaHealthCheck: HealthCheck {
         if parts.count >= 2, !parts[1].trimmingCharacters(in: .whitespaces).isEmpty {
             input = parts[1].trimmingCharacters(in: .whitespaces)
         } else {
-            input = "monitorino healthcheck seed"
+            input = "hatarim healthcheck seed"
         }
 
         var mathChallenge: MathChallenge? = nil

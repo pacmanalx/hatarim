@@ -8,7 +8,7 @@ import os.log
 final class LocationPermissionHelper: NSObject, CLLocationManagerDelegate {
     static let shared = LocationPermissionHelper()
     private let manager = CLLocationManager()
-    private let logger = Logger(subsystem: "com.pacman.monitorino2", category: "Location")
+    private let logger = Logger(subsystem: "com.pacman.hatarim", category: "Location")
 
     override init() {
         super.init()
