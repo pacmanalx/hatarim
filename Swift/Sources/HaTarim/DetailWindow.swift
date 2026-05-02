@@ -1875,6 +1875,11 @@ private struct NetworkConnectionsCard: View {
     @AppStorage("showLocalConns") private var showLocal: Bool = false
     @State private var showAllListening: Bool = false
     @State private var showAllOutbound: Bool = false
+    @State private var hoveredRowId: String? = nil
+    @State private var killCandidate: ListeningPort? = nil
+    @State private var killingPids: Set<Int> = []
+    @State private var killToast: (message: String, isError: Bool)? = nil
+    @State private var deniedCommand: String? = nil
 
     private static let initialListeningCount = 8
     private static let initialOutboundCount = 8
@@ -1952,15 +1957,21 @@ private struct NetworkConnectionsCard: View {
 
     @ViewBuilder
     private func listeningRow(_ lp: ListeningPort) -> some View {
+        let canKill = ProcessKiller.belongsToCurrentUser(lp.pid)
+        let isKilling = killingPids.contains(lp.pid)
+        let isHovered = hoveredRowId == lp.id
+
         HStack(spacing: 6) {
             Text(lp.process)
                 .font(.system(.caption2, design: .monospaced).weight(.semibold))
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(width: 110, alignment: .leading)
+                .opacity(isKilling ? 0.5 : 1.0)
             Text(":\(lp.port)")
                 .font(.system(.caption2, design: .monospaced))
                 .foregroundStyle(.primary)
+                .opacity(isKilling ? 0.5 : 1.0)
             if let svc = lp.serviceName {
                 Text(svc)
                     .font(.caption2)
@@ -1973,9 +1984,135 @@ private struct NetworkConnectionsCard: View {
                     )
             }
             Spacer()
-            Text(lp.bindAddress == "*" ? "all" : lp.bindAddress)
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundStyle(bindColor(lp.bindAddress))
+            if isKilling {
+                Text(L.t("stopping…", "parando…"))
+                    .font(.caption2.italic())
+                    .foregroundStyle(.orange)
+            } else {
+                Text(lp.bindAddress == "*" ? "all" : lp.bindAddress)
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(bindColor(lp.bindAddress))
+            }
+            if canKill && !isKilling {
+                Button { killCandidate = lp } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.red.opacity(isHovered ? 1 : 0))
+                }
+                .buttonStyle(.plain)
+                .help(L.t("Kill \(lp.process) (PID \(lp.pid))",
+                          "Matar \(lp.process) (PID \(lp.pid))"))
+            } else {
+                // Reserva mesma largura pra alinhamento das linhas (ícone 12px + spacing)
+                Color.clear.frame(width: 14, height: 12)
+            }
+        }
+        .contentShape(Rectangle())
+        .onHover { hovering in hoveredRowId = hovering ? lp.id : nil }
+        .confirmationDialog(
+            killDialogTitle(killCandidate),
+            isPresented: Binding(
+                get: { killCandidate != nil },
+                set: { if !$0 { killCandidate = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: killCandidate
+        ) { lp in
+            Button(L.t("Kill", "Matar"), role: .destructive) {
+                performKill(lp)
+                killCandidate = nil
+            }
+            Button(L.t("Cancel", "Cancelar"), role: .cancel) { killCandidate = nil }
+        } message: { lp in
+            Text(L.t(
+                "PID \(lp.pid) listening on port \(lp.port).\nSends SIGTERM first; escalates to SIGKILL after 5s if still alive.\nUnsaved state may be lost.",
+                "PID \(lp.pid) escutando na porta \(lp.port).\nManda SIGTERM primeiro; escala pra SIGKILL após 5s se ainda estiver vivo.\nEstado não salvo pode ser perdido."
+            ))
+        }
+        .overlay(alignment: .topTrailing) {
+            if let toast = killToast {
+                killToastView(toast)
+            }
+        }
+    }
+
+    private func killDialogTitle(_ lp: ListeningPort?) -> String {
+        guard let lp = lp else { return "" }
+        return L.t("Kill \(lp.process)?", "Matar \(lp.process)?")
+    }
+
+    @ViewBuilder
+    private func killToastView(_ toast: (message: String, isError: Bool)) -> some View {
+        VStack(alignment: .trailing, spacing: 4) {
+            Text(toast.message)
+                .font(.caption2)
+                .foregroundStyle(toast.isError ? .red : .green)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(.thinMaterial)
+                )
+            if let cmd = deniedCommand {
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(cmd, forType: .string)
+                    deniedCommand = nil
+                    showToast("Copiado", isError: false)
+                } label: {
+                    Label(L.t("Copy sudo command", "Copiar comando sudo"), systemImage: "doc.on.doc")
+                        .font(.caption2)
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+    }
+
+    private func performKill(_ lp: ListeningPort) {
+        let pid = lp.pid
+        _ = withAnimation(.easeInOut(duration: 0.15)) { killingPids.insert(pid) }
+        deniedCommand = nil
+
+        let termResult = ProcessKiller.sendTerm(pid)
+        switch termResult {
+        case .denied:
+            killingPids.remove(pid)
+            deniedCommand = "sudo kill -9 \(pid)"
+            showToast(L.t("Permission denied — try sudo", "Permissão negada — use sudo"), isError: true)
+            return
+        case .alreadyDead:
+            killingPids.remove(pid)
+            showToast(L.t("Already dead", "Já estava morto"), isError: false)
+            return
+        case .error(let msg):
+            killingPids.remove(pid)
+            showToast("kill: \(msg)", isError: true)
+            return
+        case .ok:
+            break
+        }
+
+        // Watchdog: após 5s, se ainda vivo, escala pra SIGKILL
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            guard killingPids.contains(pid) else { return }
+            if ProcessKiller.isAlive(pid) {
+                let killResult = ProcessKiller.sendKill(pid)
+                if case .ok = killResult {
+                    showToast(L.t("Force killed PID \(pid)", "PID \(pid) morto à força"), isError: false)
+                } else {
+                    showToast(L.t("Could not kill PID \(pid)", "Não consegui matar PID \(pid)"), isError: true)
+                }
+            } else {
+                showToast(L.t("Stopped PID \(pid)", "PID \(pid) parado"), isError: false)
+            }
+            killingPids.remove(pid)
+        }
+    }
+
+    private func showToast(_ msg: String, isError: Bool) {
+        killToast = (msg, isError)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+            if killToast?.message == msg { killToast = nil }
         }
     }
 
