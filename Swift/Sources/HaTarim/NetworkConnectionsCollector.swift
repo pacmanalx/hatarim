@@ -140,6 +140,12 @@ final class NetworkConnectionsCollector {
         50000: "DRDA"
     ]
 
+    /// Força a próxima `sample()` a ignorar o cache e re-executar lsof imediatamente.
+    /// Útil após ações que mudam o estado de portas (ex: kill de processo).
+    func invalidateCache() {
+        lastSample = .distantPast
+    }
+
     func sample() -> (listening: [ListeningPort], outbound: [OutboundConnection], history: [RecentConnection]) {
         let now = Date()
         if now.timeIntervalSince(lastSample) < Self.refreshSec, !cachedListening.isEmpty || !cachedOutbound.isEmpty {

@@ -1957,7 +1957,7 @@ private struct NetworkConnectionsCard: View {
 
     @ViewBuilder
     private func listeningRow(_ lp: ListeningPort) -> some View {
-        let canKill = ProcessKiller.belongsToCurrentUser(lp.pid)
+        let canKill = ProcessKiller.belongsToCurrentUser(lp.pid, processName: lp.process)
         let isKilling = killingPids.contains(lp.pid)
         let isHovered = hoveredRowId == lp.id
 
@@ -2092,6 +2092,9 @@ private struct NetworkConnectionsCard: View {
             break
         }
 
+        // Refresh imediato do collector (não esperar os 2s do tick agendado)
+        stats.refreshConnectionsNow()
+
         // Watchdog: após 5s, se ainda vivo, escala pra SIGKILL
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             guard killingPids.contains(pid) else { return }
@@ -2106,6 +2109,7 @@ private struct NetworkConnectionsCard: View {
                 showToast(L.t("Stopped PID \(pid)", "PID \(pid) parado"), isError: false)
             }
             killingPids.remove(pid)
+            stats.refreshConnectionsNow()
         }
     }
 

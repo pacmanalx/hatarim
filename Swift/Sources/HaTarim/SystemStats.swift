@@ -95,6 +95,19 @@ final class SystemStats: ObservableObject {
 
     deinit { timer?.invalidate() }
 
+    /// Força refresh imediato dos collectors voláteis (atualmente conexões/portas).
+    /// Útil após ações como kill de processo, onde queremos ver o efeito sem
+    /// esperar o próximo tick agendado.
+    func refreshConnectionsNow() {
+        connsCol.invalidateCache()
+        let v = connsCol.sample()
+        DispatchQueue.main.async {
+            self.listeningPorts = v.listening
+            self.outboundConnections = v.outbound
+            self.recentConnections = v.history
+        }
+    }
+
     private func restartTimer() {
         timer?.invalidate()
         let t = Timer(timeInterval: refreshInterval, repeats: true) { [weak self] _ in
