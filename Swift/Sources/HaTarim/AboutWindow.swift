@@ -12,6 +12,8 @@ struct AboutWindow: View {
             VStack(alignment: .center, spacing: 18) {
                 appHeader
                 Divider().padding(.horizontal, 40)
+                originBlock
+                Divider().padding(.horizontal, 40)
                 licenseBlock
                 Divider().padding(.horizontal, 40)
                 groupsBlock
@@ -22,8 +24,34 @@ struct AboutWindow: View {
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)
         }
-        .frame(minWidth: 460, idealWidth: 520, minHeight: 600, idealHeight: 720)
+        .frame(minWidth: 460, idealWidth: 520, minHeight: 640, idealHeight: 760)
         .background(Color(NSColor.windowBackgroundColor))
+    }
+
+    @ViewBuilder
+    private var originBlock: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "scroll")
+                    .foregroundStyle(.brown)
+                Text(L.t("Origin of the name", "Origem do nome"))
+                    .font(.headline)
+            }
+            Text(L.t(
+                "**HaTarim** (התרים) is Biblical Hebrew for *the explorers* — from the verb *latur* (לתור, \"to scout out\"), the same root that became *tour* in Latin and English. Numbers 13:2 uses it for the twelve scouts Moses sends to reconnoiter Canaan.",
+                "**HaTarim** (התרים) é hebraico bíblico pra *os exploradores* — do verbo *latur* (לתור, \"explorar, reconhecer\"), a mesma raiz que virou *tour* em latim e inglês. Números 13:2 usa o termo pros doze espiões que Moisés envia pra reconhecer Canaã."
+            ))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 20)
+
+            Text(L.t("\"Take a tour of your stack.\"", "\"Faça um tour pela sua stack.\""))
+                .font(.caption)
+                .italic()
+                .foregroundStyle(.tertiary)
+                .padding(.top, 2)
+        }
     }
 
     @ViewBuilder

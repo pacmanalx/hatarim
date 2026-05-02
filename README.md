@@ -367,7 +367,7 @@ GPL v3.0 — see [LICENSE.md](LICENSE.md) for the full text and notes on third-p
 
 ## Status
 
-This is **beta software**, currently at version `0.4.10`. The core dashboard and Arduino bridge are stable
+This is **beta software**, currently at version `0.4.11`. The core dashboard and Arduino bridge are stable
 and used daily by the author on a Mac mini and a MacBook Air. Public v1.0 release is planned for
 **week of 2026-05-08**.
 
