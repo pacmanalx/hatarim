@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Swift/AppIcon-source.png" width="180" alt="HaTarim app icon"/>
+</p>
+
 # HaTarim
 
 > **A dev cockpit for macOS developers building Web + AI**
