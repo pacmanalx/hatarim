@@ -1,0 +1,12 @@
+.DS_Store
+Swift/.build/
+Swift/.swiftpm/
+Swift/*.app
+Python/__pycache__/
+Python/.venv/
+Python/*.pyc
+Arduino/.pio/
+.claude/
+.vscode/
+*.swp
+*.swo
