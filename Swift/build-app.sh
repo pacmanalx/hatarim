@@ -21,9 +21,9 @@ fi
 
 echo "==> Garantindo AppIcon.icns"
 if [[ ! -f "AppIcon.icns" ]]; then
-    swift scripts/generate-icon.swift
+    bash scripts/regenerate-icon.sh
 else
-    echo "    (já existe — para regenerar: rm AppIcon.icns)"
+    echo "    (já existe — para regenerar: rm AppIcon.icns && bash scripts/regenerate-icon.sh)"
 fi
 
 echo "==> Montando ${APP_DIR}"

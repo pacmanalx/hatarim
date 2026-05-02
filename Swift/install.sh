@@ -11,7 +11,7 @@ INSTALL_DIR="$HOME/Applications"
 LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
 LABEL="com.pacman.hatarim"
 PLIST="$LAUNCH_AGENT_DIR/$LABEL.plist"
-BUNDLE_VERSION="0.4.11"
+BUNDLE_VERSION="0.4.12"
 
 echo "==> HaTarim installer"
 
@@ -59,8 +59,8 @@ BIN_PATH=".build/release/${APP_NAME}"
 
 # 2a. Garante AppIcon.icns
 if [[ ! -f "AppIcon.icns" ]]; then
-    echo "==> Gerando AppIcon.icns"
-    swift scripts/generate-icon.swift
+    echo "==> Gerando AppIcon.icns a partir de AppIcon-source.png"
+    bash scripts/regenerate-icon.sh
 fi
 
 # 2b. Empacota .app local
