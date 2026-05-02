@@ -30,8 +30,9 @@ struct HaTarimApp: App {
         if !Platform.isAppleSilicon {
             let alert = NSAlert()
             alert.alertStyle = .critical
-            alert.messageText = "HaTarim requer Apple Silicon"
-            alert.informativeText = "Este app só roda em Macs com chip Apple (M1 ou superior)."
+            alert.messageText = L.t("HaTarim requires Apple Silicon", "HaTarim requer Apple Silicon")
+            alert.informativeText = L.t("This app only runs on Macs with Apple chips (M1 or later).",
+                                        "Este app só roda em Macs com chip Apple (M1 ou superior).")
             alert.runModal()
             NSApp.terminate(nil)
         }
@@ -100,32 +101,32 @@ struct HaTarimApp: App {
                 }
             }
             CommandGroup(replacing: .appSettings) {
-                Button("Configuração…") {
+                Button(L.t("Settings…", "Configuração…")) {
                     NSApp.activate(ignoringOtherApps: true)
                     NotificationCenter.default.post(name: .openSettings, object: nil)
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
             CommandMenu("Monitor") {
-                Button("Janela Detalhada") {
+                Button(L.t("Detail Window", "Janela Detalhada")) {
                     NSApp.activate(ignoringOtherApps: true)
                     NotificationCenter.default.post(name: .reopenDetail, object: nil)
                 }
                 .keyboardShortcut("d", modifiers: .command)
 
-                Button("Configuração…") {
+                Button(L.t("Settings…", "Configuração…")) {
                     NSApp.activate(ignoringOtherApps: true)
                     NotificationCenter.default.post(name: .openSettings, object: nil)
                 }
                 .keyboardShortcut(",", modifiers: .command)
 
-                Button("Heatmap 7d…") {
+                Button(L.t("Heatmap 7d…", "Heatmap 7d…")) {
                     NSApp.activate(ignoringOtherApps: true)
                     NotificationCenter.default.post(name: .openHeatmap, object: nil)
                 }
                 .keyboardShortcut("h", modifiers: .command)
 
-                Button("Controle da FAN…") {
+                Button(L.t("FAN Control…", "Controle da FAN…")) {
                     NSApp.activate(ignoringOtherApps: true)
                     NotificationCenter.default.post(name: .openFan, object: nil)
                 }
@@ -133,7 +134,7 @@ struct HaTarimApp: App {
 
                 Divider()
 
-                Menu("Taxa de atualização") {
+                Menu(L.t("Refresh rate", "Taxa de atualização")) {
                     ForEach(SystemStats.availableIntervals, id: \.self) { rate in
                         Button {
                             stats.refreshInterval = rate

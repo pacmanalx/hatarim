@@ -7,7 +7,7 @@ struct MenuBarContent: View {
 
     var body: some View {
         Text(cpuHeader)
-        Menu("Cores") {
+        Menu(L.t("Cores", "Núcleos")) {
             ForEach(Array(stats.perCoreCPU.enumerated()), id: \.offset) { idx, val in
                 Text("\(coreLabel(idx))   \(formatPercent(val))")
             }
@@ -19,7 +19,7 @@ struct MenuBarContent: View {
 
         if stats.powerAvailable {
             Text(powerHeader)
-            Menu("Power detalhado") {
+            Menu(L.t("Power breakdown", "Power detalhado")) {
                 Text("ANE         \(formatPower(stats.power.aneMilliwatts))")
                 Text("P-cluster   \(formatPower(stats.power.pCpuMilliwatts))")
                 Text("E-cluster   \(formatPower(stats.power.eCpuMilliwatts))")
@@ -38,10 +38,10 @@ struct MenuBarContent: View {
 
         Menu("Volumes (\(stats.volumes.count))") {
             if stats.volumes.isEmpty {
-                Text("nenhum montado")
+                Text(L.t("none mounted", "nenhum montado"))
             } else {
                 ForEach(stats.volumes) { v in
-                    Text("\(v.name)   \(formatBytes(UInt64(v.availableBytes))) livres / \(formatBytes(UInt64(v.totalBytes)))")
+                    Text("\(v.name)   \(formatBytes(UInt64(v.availableBytes))) \(L.t("free", "livres")) / \(formatBytes(UInt64(v.totalBytes)))")
                 }
             }
         }
@@ -53,20 +53,20 @@ struct MenuBarContent: View {
         Text(stackLine)
         Divider()
 
-        Button("Janela detalhada…") {
+        Button(L.t("Detail Window…", "Janela detalhada…")) {
             NSApp.activate(ignoringOtherApps: true)
             openWindow(id: "detail")
         }
         .keyboardShortcut("d")
 
-        Button("Configuração…") {
+        Button(L.t("Settings…", "Configuração…")) {
             NSApp.activate(ignoringOtherApps: true)
             openWindow(id: "settings")
         }
         .keyboardShortcut(",")
         Divider()
 
-        Menu("Taxa: \(formatInterval(stats.refreshInterval))") {
+        Menu("\(L.t("Rate", "Taxa")): \(formatInterval(stats.refreshInterval))") {
             ForEach(SystemStats.availableIntervals, id: \.self) { rate in
                 Button {
                     stats.refreshInterval = rate
@@ -81,7 +81,7 @@ struct MenuBarContent: View {
         }
         Divider()
 
-        Button("Sair") { NSApplication.shared.terminate(nil) }
+        Button(L.t("Quit", "Sair")) { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
     }
 
@@ -112,14 +112,14 @@ struct MenuBarContent: View {
 
     private var stackLine: String {
         let s = scheduler.summary
-        if s.total == 0 { return "Stack  ⚪️  nenhum serviço" }
-        return "Stack \(scheduler.aggregateStatus.symbol)  \(s.ok)/\(s.total) saudáveis"
+        if s.total == 0 { return "Stack  ⚪️  \(L.t("no services", "nenhum serviço"))" }
+        return "Stack \(scheduler.aggregateStatus.symbol)  \(s.ok)/\(s.total) \(L.t("healthy", "saudáveis"))"
     }
 
     private var arduinoLine: String {
         let b = stats.arduino
-        if b.health == .idle { return "Arduino  ⚪️  modo monitor (sem hardware)" }
-        if !b.connected { return "Arduino  🔴  daemon sem porta serial" }
+        if b.health == .idle { return "Arduino  ⚪️  \(L.t("monitor mode (no hardware)", "modo monitor (sem hardware)"))" }
+        if !b.connected { return "Arduino  🔴  \(L.t("daemon without serial port", "daemon sem porta serial"))" }
         let dev = b.deviceInfo?.friendlyName ?? "Serial device"
         let port = (b.portPath ?? "—").replacingOccurrences(of: "/dev/", with: "")
         let dot: String
