@@ -86,6 +86,12 @@ struct HaTarimApp: App {
         }
         .defaultSize(width: 520, height: 720)
         .windowResizability(.contentSize)
+
+        Window(L.t("HaTarim — GPU Bench", "HaTarim — GPU Bench"), id: "gpubench") {
+            GPUBenchWindow(stats: stats)
+        }
+        .defaultSize(width: 880, height: 560)
+        .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(replacing: .newItem) { }
             CommandGroup(replacing: .appInfo) {
@@ -119,6 +125,12 @@ struct HaTarimApp: App {
                     NotificationCenter.default.post(name: .openFan, object: nil)
                 }
                 .keyboardShortcut("f", modifiers: .command)
+
+                Button(L.t("GPU Bench…", "GPU Bench…")) {
+                    NSApp.activate(ignoringOtherApps: true)
+                    NotificationCenter.default.post(name: .openGPUBench, object: nil)
+                }
+                .keyboardShortcut("b", modifiers: .command)
 
                 Divider()
 
@@ -175,6 +187,7 @@ extension Notification.Name {
     static let openSettings = Notification.Name("HaTarim.openSettings")
     static let openFan = Notification.Name("HaTarim.openFan")
     static let openAbout = Notification.Name("HaTarim.openAbout")
+    static let openGPUBench = Notification.Name("HaTarim.openGPUBench")
     static let fanControllerReady = Notification.Name("HaTarim.fanControllerReady")
 }
 
@@ -194,6 +207,9 @@ struct ReopenObserver: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .openAbout)) { _ in
                 openOrFocus(windowId: "about")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openGPUBench)) { _ in
+                openOrFocus(windowId: "gpubench")
             }
     }
 

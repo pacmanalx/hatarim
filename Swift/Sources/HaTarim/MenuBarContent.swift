@@ -59,6 +59,12 @@ struct MenuBarContent: View {
         }
         .keyboardShortcut("d")
 
+        Button(L.t("GPU Bench…", "GPU Bench…")) {
+            NSApp.activate(ignoringOtherApps: true)
+            openWindow(id: "gpubench")
+        }
+        .keyboardShortcut("b")
+
         Button(L.t("Settings…", "Configuração…")) {
             NSApp.activate(ignoringOtherApps: true)
             openWindow(id: "settings")

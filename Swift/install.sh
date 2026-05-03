@@ -11,7 +11,7 @@ INSTALL_DIR="$HOME/Applications"
 LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
 LABEL="com.pacman.hatarim"
 PLIST="$LAUNCH_AGENT_DIR/$LABEL.plist"
-BUNDLE_VERSION="0.4.13"
+BUNDLE_VERSION="0.5.2"
 
 echo "==> HaTarim installer"
 
