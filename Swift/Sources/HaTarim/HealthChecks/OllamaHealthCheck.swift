@@ -135,7 +135,7 @@ struct OllamaHealthCheck: HealthCheck {
         }
 
         let urlStr = "\(base)/api/generate"
-        let bodyDict: [String: Any] = ["model": model, "prompt": prompt, "stream": false]
+        let bodyDict: [String: Any] = ["model": model, "prompt": prompt, "stream": false, "keep_alive": -1]
         let bodyData = try? JSONSerialization.data(withJSONObject: bodyDict)
         let bodyJSON = String(data: bodyData ?? Data(), encoding: .utf8) ?? ""
         let preview = "POST \(urlStr)\n  body: \(bodyJSON)"
@@ -217,7 +217,7 @@ struct OllamaHealthCheck: HealthCheck {
         }
 
         let urlStr = "\(base)/api/embed"
-        let bodyDict: [String: Any] = ["model": model, "input": input]
+        let bodyDict: [String: Any] = ["model": model, "input": input, "keep_alive": -1]
         let bodyData = try? JSONSerialization.data(withJSONObject: bodyDict)
         let bodyJSON = String(data: bodyData ?? Data(), encoding: .utf8) ?? ""
         let preview = "POST \(urlStr)\n  body: \(bodyJSON)"

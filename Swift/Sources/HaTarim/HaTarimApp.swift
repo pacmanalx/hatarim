@@ -56,16 +56,9 @@ struct HaTarimApp: App {
     }
 
     var body: some Scene {
-        MenuBarExtra {
-            MenuBarContent(stats: stats, scheduler: healthScheduler)
-            ReopenObserver()
-        } label: {
-            MenuBarChipIconView()
-        }
-        .menuBarExtraStyle(.menu)
-
-        Window(L.t("HaTarim — Details", "HaTarim — Detalhes"), id: "detail") {
+        Window("HaTarim", id: "detail") {
             DetailWindow(stats: stats, servicesStore: servicesStore, healthScheduler: healthScheduler)
+                .background(ReopenObserver())
         }
         .defaultSize(width: 760, height: 560)
         .windowResizability(.contentMinSize)
@@ -108,7 +101,7 @@ struct HaTarimApp: App {
                 .keyboardShortcut(",", modifiers: .command)
             }
             CommandMenu("Monitor") {
-                Button(L.t("Detail Window", "Janela Detalhada")) {
+                Button("HaTarim") {
                     NSApp.activate(ignoringOtherApps: true)
                     NotificationCenter.default.post(name: .reopenDetail, object: nil)
                 }
@@ -167,7 +160,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        false
+        true
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

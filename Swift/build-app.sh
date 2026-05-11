@@ -57,12 +57,12 @@ echo "==> codesign ad-hoc"
 codesign -s - -f --deep "${APP_DIR}" >/dev/null
 
 echo "==> abrindo ${APP_DIR}"
-# mata instância anterior se houver, pra evitar duplicado na menubar
+# mata instância anterior se houver
 pkill -x "${APP_NAME}" 2>/dev/null || true
 sleep 0.5
 open "${APP_DIR}"
 
 echo ""
-echo "==> Pronto. Procure o ícone 'cpu' na barra de menu."
+echo "==> Pronto. Janela principal aberta."
 echo "    Bundle:    $(pwd)/${APP_DIR}"
-echo "    Para sair: clique no ícone → Sair (ou ⌘Q com o menu aberto)"
+echo "    Para sair: ⌘Q"
