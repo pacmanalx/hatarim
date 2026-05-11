@@ -12,6 +12,8 @@ struct CallLLMCard: View {
     @State private var answer: String = ""
     @State private var history: [QAPair] = []
     @State private var loading: Bool = false
+    @State private var sendTask: Task<Void, Never>? = nil
+    @State private var cancelToken: LLMCallCancelToken? = nil
     @State private var lastDurationMs: Int? = nil
     @State private var errorText: String? = nil
     @State private var showHistorySheet: Bool = false
@@ -138,7 +140,8 @@ struct CallLLMCard: View {
                 )
             HStack {
                 Button {
-                    Task { await send() }
+                    let t = Task { await send() }
+                    sendTask = t
                 } label: {
                     if loading {
                         HStack(spacing: 6) {
@@ -152,6 +155,15 @@ struct CallLLMCard: View {
                 .keyboardShortcut(.return, modifiers: [.command])
                 .disabled(loading || selectedTarget == nil ||
                           question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                if loading {
+                    Button(role: .destructive) {
+                        cancelSend()
+                    } label: {
+                        Label("Cancelar", systemImage: "xmark.circle.fill")
+                    }
+                    .keyboardShortcut(".", modifiers: [.command])
+                    .help("Cancelar a chamada em andamento (⌘.)")
+                }
                 Spacer()
                 if let ms = lastDurationMs {
                     Text("\(formatDuration(ms))")
@@ -208,6 +220,12 @@ struct CallLLMCard: View {
             }
             .help("Salvar resposta em arquivo")
             .disabled(answer.isEmpty)
+
+            Button(role: .destructive) { clearAnswer() } label: {
+                Image(systemName: "eraser")
+            }
+            .help("Limpar resposta (volta ao tamanho compacto)")
+            .disabled(answer.isEmpty && errorText == nil)
 
             Menu {
                 Button("Apps do macOS (AirDrop, Mail, Messages…)") { showSharingPicker() }
@@ -310,15 +328,28 @@ struct CallLLMCard: View {
         guard let target = selectedTarget else { return }
         let q = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return }
+        let token = LLMCallCancelToken()
         await MainActor.run {
             loading = true
             errorText = nil
             answer = ""
             lastDurationMs = nil
+            cancelToken = token
         }
-        let result = await OllamaCaller.generate(target: target, prompt: q)
+        let result = await OllamaCaller.generate(target: target, prompt: q, cancelToken: token)
+        if Task.isCancelled || token.isCancelled {
+            await MainActor.run {
+                loading = false
+                errorText = "cancelado"
+                cancelToken = nil
+                sendTask = nil
+            }
+            return
+        }
         await MainActor.run {
             loading = false
+            cancelToken = nil
+            sendTask = nil
             switch result {
             case .success(let r):
                 answer = r.text
@@ -332,6 +363,17 @@ struct CallLLMCard: View {
                 errorText = e.message
             }
         }
+    }
+
+    private func cancelSend() {
+        cancelToken?.cancel()
+        sendTask?.cancel()
+    }
+
+    private func clearAnswer() {
+        answer = ""
+        errorText = nil
+        lastDurationMs = nil
     }
 
     private func copyToClipboard() {
@@ -496,21 +538,50 @@ struct OllamaCallError: Error, LocalizedError {
     var errorDescription: String? { message }
 }
 
+/// Token compartilhado entre a UI e o caller. UI chama `cancel()` pra abortar:
+/// - HTTP: `URLSessionTask.cancel()` libera o `await` com URLError.cancelled.
+/// - Local/SSH: `Process.terminate()` mata o subprocess.
+final class LLMCallCancelToken: @unchecked Sendable {
+    private let lock = NSLock()
+    private var process: Process?
+    private var urlTask: URLSessionTask?
+    private var cancelled = false
+    var isCancelled: Bool { lock.lock(); defer { lock.unlock() }; return cancelled }
+    func registerProcess(_ p: Process) {
+        lock.lock(); defer { lock.unlock() }
+        if cancelled { p.terminate(); return }
+        process = p
+    }
+    func registerURLTask(_ t: URLSessionTask) {
+        lock.lock(); defer { lock.unlock() }
+        if cancelled { t.cancel(); return }
+        urlTask = t
+    }
+    func cancel() {
+        lock.lock(); defer { lock.unlock() }
+        cancelled = true
+        if let p = process, p.isRunning { p.terminate() }
+        urlTask?.cancel()
+        process = nil
+        urlTask = nil
+    }
+}
+
 enum OllamaCaller {
     struct Reply { let text: String; let durationMs: Int }
 
-    static func generate(target: LLMTarget, prompt: String) async -> Result<Reply, OllamaCallError> {
+    static func generate(target: LLMTarget, prompt: String, cancelToken: LLMCallCancelToken? = nil) async -> Result<Reply, OllamaCallError> {
         switch target.kind {
-        case .ollama: return await generateHTTP(target: target, prompt: prompt)
-        case .ssh:    return await generateSSH(target: target, prompt: prompt)
-        case .local:  return await generateLocal(target: target, prompt: prompt)
+        case .ollama: return await generateHTTP(target: target, prompt: prompt, cancelToken: cancelToken)
+        case .ssh:    return await generateSSH(target: target, prompt: prompt, cancelToken: cancelToken)
+        case .local:  return await generateLocal(target: target, prompt: prompt, cancelToken: cancelToken)
         default:      return .failure(OllamaCallError("kind \(target.kind.rawValue) não suportado"))
         }
     }
 
     /// Local: prefere `level3.command` como template (substitui {{problem}}/{{prompt}}).
     /// Se vazio, fallback `claude --print "<prompt>"` (assume Claude Code).
-    private static func generateLocal(target: LLMTarget, prompt: String) async -> Result<Reply, OllamaCallError> {
+    private static func generateLocal(target: LLMTarget, prompt: String, cancelToken: LLMCallCancelToken?) async -> Result<Reply, OllamaCallError> {
         let actualCmd: String
         if let custom = substitutePrompt(template: target.callTemplate, prompt: prompt) {
             actualCmd = custom
@@ -535,6 +606,7 @@ enum OllamaCaller {
                 process.standardError = stderrPipe
 
                 let start = DispatchTime.now()
+                cancelToken?.registerProcess(process)
                 do { try process.run() }
                 catch {
                     continuation.resume(returning: .failure(OllamaCallError("bash falhou: \(error.localizedDescription)")))
@@ -583,7 +655,7 @@ enum OllamaCaller {
         return gen.response?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
 
-    private static func generateHTTP(target: LLMTarget, prompt: String) async -> Result<Reply, OllamaCallError> {
+    private static func generateHTTP(target: LLMTarget, prompt: String, cancelToken: LLMCallCancelToken?) async -> Result<Reply, OllamaCallError> {
         let base = target.endpoint.trimmingCharacters(in: CharacterSet(charactersIn: "/ "))
         guard !base.isEmpty else { return .failure(OllamaCallError("endpoint vazio")) }
         let urlStr = "\(base)/api/generate"
@@ -609,12 +681,14 @@ enum OllamaCaller {
             return .success(Reply(text: text, durationMs: durationMs))
         } catch let e as URLError where e.code == .timedOut {
             return .failure(OllamaCallError("timeout (\(target.timeoutSec)s)"))
+        } catch let e as URLError where e.code == .cancelled {
+            return .failure(OllamaCallError("cancelado"))
         } catch {
             return .failure(OllamaCallError(error.localizedDescription))
         }
     }
 
-    private static func generateSSH(target: LLMTarget, prompt: String) async -> Result<Reply, OllamaCallError> {
+    private static func generateSSH(target: LLMTarget, prompt: String, cancelToken: LLMCallCancelToken?) async -> Result<Reply, OllamaCallError> {
         let host = target.endpoint.trimmingCharacters(in: .whitespaces)
         guard !host.isEmpty else { return .failure(OllamaCallError("host SSH vazio")) }
         // Estratégia: usa level3.command como template (substitui {{problem}}/{{prompt}} pelo
@@ -656,6 +730,7 @@ enum OllamaCaller {
                 process.standardError = stderrPipe
 
                 let start = DispatchTime.now()
+                cancelToken?.registerProcess(process)
                 do {
                     try process.run()
                 } catch {

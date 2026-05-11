@@ -72,6 +72,10 @@ struct DetailWindow: View {
         GridItem(.flexible(), spacing: 10)
     ]
     private let adaptiveCols = [GridItem(.adaptive(minimum: 300), spacing: 10)]
+    private let twoCols: [GridItem] = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
 
     var body: some View {
         ScrollView {
@@ -110,12 +114,12 @@ struct DetailWindow: View {
                     section(L.t("LLM Stack", "Stack LLM"), icon: "checkmark.shield.fill", color: schedulerColor,
                             subtitle: schedulerSubtitle) {
                         VStack(spacing: 10) {
-                            HStack(alignment: .top, spacing: 10) {
+                            LazyVGrid(columns: twoCols, spacing: 10) {
                                 StackHealthTable(services: servicesStore.config.services,
                                                  scheduler: healthScheduler)
-                                    .frame(maxWidth: .infinity)
+                                    .alignedTop()
                                 CallLLMCard(services: servicesStore.config.services)
-                                    .frame(maxWidth: .infinity)
+                                    .alignedTop()
                             }
                             HeatmapCard(store: servicesStore, scheduler: healthScheduler)
                         }
