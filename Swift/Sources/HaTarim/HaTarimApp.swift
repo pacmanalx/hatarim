@@ -8,6 +8,8 @@ struct HaTarimApp: App {
     @StateObject private var healthScheduler: HealthCheckScheduler
     @StateObject private var fanStore: FanConfigStore
     @StateObject private var fanController: FanController
+    @StateObject private var tasksStore: TasksStore
+    @StateObject private var taskScheduler: TaskScheduler
 
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
@@ -48,16 +50,27 @@ struct HaTarimApp: App {
         // pra produzir F:0/F:1 no payload desde o primeiro tick.
         st.fanController = fc
 
+        let tStore = TasksStore()
+        let tSched = TaskScheduler()
+        tSched.bind(store: tStore)
+        tSched.start()
+
         _stats = StateObject(wrappedValue: st)
         _servicesStore = StateObject(wrappedValue: store)
         _healthScheduler = StateObject(wrappedValue: scheduler)
         _fanStore = StateObject(wrappedValue: fStore)
         _fanController = StateObject(wrappedValue: fc)
+        _tasksStore = StateObject(wrappedValue: tStore)
+        _taskScheduler = StateObject(wrappedValue: tSched)
     }
 
     var body: some Scene {
         Window("HaTarim", id: "detail") {
-            DetailWindow(stats: stats, servicesStore: servicesStore, healthScheduler: healthScheduler)
+            DetailWindow(stats: stats,
+                         servicesStore: servicesStore,
+                         healthScheduler: healthScheduler,
+                         tasksStore: tasksStore,
+                         taskScheduler: taskScheduler)
                 .background(ReopenObserver())
         }
         .defaultSize(width: 760, height: 560)
@@ -84,6 +97,12 @@ struct HaTarimApp: App {
             GPUBenchWindow(stats: stats)
         }
         .defaultSize(width: 880, height: 560)
+        .windowResizability(.contentMinSize)
+
+        Window(L.t("HaTarim — Scheduler", "HaTarim — Scheduler"), id: "scheduler") {
+            SchedulerWindow(store: tasksStore, scheduler: taskScheduler)
+        }
+        .defaultSize(width: 820, height: 540)
         .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(replacing: .newItem) { }
@@ -124,6 +143,12 @@ struct HaTarimApp: App {
                     NotificationCenter.default.post(name: .openGPUBench, object: nil)
                 }
                 .keyboardShortcut("b", modifiers: .command)
+
+                Button(L.t("Scheduler…", "Scheduler…")) {
+                    NSApp.activate(ignoringOtherApps: true)
+                    NotificationCenter.default.post(name: .openScheduler, object: nil)
+                }
+                .keyboardShortcut("k", modifiers: .command)
 
                 Divider()
 
@@ -203,6 +228,9 @@ struct ReopenObserver: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .openGPUBench)) { _ in
                 openOrFocus(windowId: "gpubench")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openScheduler)) { _ in
+                openOrFocus(windowId: "scheduler")
             }
     }
 

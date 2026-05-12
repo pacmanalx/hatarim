@@ -62,6 +62,8 @@ struct DetailWindow: View {
     @ObservedObject var stats: SystemStats
     @ObservedObject var servicesStore: ServicesStore
     @ObservedObject var healthScheduler: HealthCheckScheduler
+    @ObservedObject var tasksStore: TasksStore
+    @ObservedObject var taskScheduler: TaskScheduler
     @AppStorage("windowAlpha") private var windowAlpha: Double = 1.0
     @AppStorage("cardsAlpha")  private var cardsAlpha: Double = 1.0
     @AppStorage("alwaysOnTop") private var alwaysOnTop: Bool = false
@@ -132,6 +134,12 @@ struct DetailWindow: View {
                     LazyVGrid(columns: threeCols, spacing: 10) {
                         ArduinoCard(stats: stats).alignedTop()
                     }
+                }
+
+                // Tier 6 — Scheduler
+                section(L.t("Scheduler", "Scheduler"),
+                        icon: "calendar.badge.clock", color: .indigo) {
+                    SchedulerCard(store: tasksStore, scheduler: taskScheduler)
                 }
             }
             .padding(.horizontal, 14)
