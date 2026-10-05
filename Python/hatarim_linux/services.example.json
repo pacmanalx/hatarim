@@ -1,0 +1,57 @@
+{
+  "intervalSec": 5,
+  "services": [
+    {
+      "id": "ssh",
+      "name": "SSH",
+      "checks": [
+        { "type": "systemd", "unit": "ssh" },
+        { "type": "port", "port": 22 }
+      ],
+      "intervalSec": 60
+    },
+    {
+      "id": "docker",
+      "name": "Docker",
+      "checks": [
+        { "type": "systemd", "unit": "docker" }
+      ],
+      "intervalSec": 60
+    },
+    {
+      "id": "ragd",
+      "name": "RAGnaRock",
+      "checks": [
+        { "type": "systemd", "unit": "ragd" },
+        { "type": "http", "url": "http://localhost:11499/health" }
+      ],
+      "intervalSec": 30
+    },
+    {
+      "id": "nidhogg",
+      "name": "Nidhogg",
+      "checks": [
+        { "type": "systemd", "unit": "nidhoggd" },
+        { "type": "http", "url": "http://localhost:11497/health" }
+      ],
+      "intervalSec": 30
+    },
+    {
+      "id": "mysql",
+      "name": "MySQL",
+      "checks": [
+        { "type": "port", "port": 3306 }
+      ],
+      "intervalSec": 60
+    },
+    {
+      "id": "tailscaled",
+      "name": "Tailscale",
+      "checks": [
+        { "type": "systemd", "unit": "tailscaled" },
+        { "type": "command", "cmd": "tailscale status --json", "expectedSubstring": "\"BackendState\": \"Running\"" }
+      ],
+      "intervalSec": 120
+    }
+  ]
+}

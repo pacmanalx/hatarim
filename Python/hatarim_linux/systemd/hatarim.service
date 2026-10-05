@@ -1,0 +1,15 @@
+[Unit]
+Description=HaTarim Linux — telemetria + health checks por serviço
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.local/lib/hatarim/hatarim.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:%h/.local/share/hatarim/hatarim.log
+StandardError=append:%h/.local/share/hatarim/hatarim.err
+
+[Install]
+WantedBy=default.target
