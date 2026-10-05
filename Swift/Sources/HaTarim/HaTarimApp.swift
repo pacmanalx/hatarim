@@ -62,7 +62,13 @@ struct HaTarimApp: App {
         _fanController = StateObject(wrappedValue: fc)
         _tasksStore = StateObject(wrappedValue: tStore)
         _taskScheduler = StateObject(wrappedValue: tSched)
+
+        // Grava snapshot.json periódico pro HaMachaneh consumir via SSH.
+        Self.snapshotWriter = SnapshotWriter(stats: st, scheduler: scheduler, servicesStore: store)
+        Self.snapshotWriter?.start()
     }
+
+    private static var snapshotWriter: SnapshotWriter?
 
     var body: some Scene {
         Window("HaTarim", id: "detail") {
